@@ -1,0 +1,275 @@
+/* ========================== */
+/*      VARIÁVEIS GERAIS      */
+/* ========================== */
+
+:root {
+    --primary-color: #19381b; /* Verde escuro da Igreja Presbiteriana */
+    --text-color: white;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(0, 0, 0, 0.1);
+    font-family: Poppins;
+}
+
+/* ========================== */
+/*    ESTILO GERAL DA PÁGINA  */
+/* ========================== */
+
+.turmas-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 2rem;
+}
+
+/* ========================== */
+/*      ESTILO DA TABELA      */
+/* ========================== */
+
+.turmas-listagem {
+    flex: 2;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+    color: black;
+}
+
+.turmas-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    color: black;
+}
+
+.turmas-tabela th, .turmas-tabela td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    color: black;
+}
+
+.turmas-tabela th {
+    font-weight: bold;
+    color: black;
+}
+
+/* ========================== */
+/*   ESTILO DO FORMULÁRIO     */
+/* ========================== */
+
+.turmas-formulario {
+    flex: 1;
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+}
+
+.turmas-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.turmas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.turmas-titulo-form {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.turmas-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.turmas-form-group label {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+.turmas-form-group input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* ========================== */
+/*  ESTILO FAIXA ETÁRIA      */
+/* ========================== */
+
+.turmas-faixa-etaria {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.turmas-faixa-container {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.turmas-faixa-container input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* ========================== */
+/*  ESTILO CHECKBOX PROFESSORES */
+/* ========================== */
+
+.turmas-professores-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.turmas-professores-lista label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+/* ========================== */
+/*      BOTÃO DE CONCLUIR     */
+/* ========================== */
+
+.turmas-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.turmas-submit:hover {
+    background: #145214;
+}
+
+/* ========================== */
+/*          SELECT            */
+/* ==========================*/
+.turmas-select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+    outline: none;
+    transition: border 0.3s ease-in-out;
+}
+
+.turmas-select:hover {
+    border: 1px solid #19381b;
+}
+
+.turmas-select:focus {
+    border: 1px solid #145214;
+    box-shadow: 0 0 5px rgba(20, 82, 20, 0.3);
+}
+
+/* Ícone da seta do select */
+.turmas-select::-ms-expand {
+    display: none; /* Remove a seta padrão do select no IE */
+}
+
+.turmas-select option {
+    padding: 0.5rem;
+    font-size: 1rem;
+}
+
+/* ========================== */
+/*      RESPONSIVIDADE        */
+/* ========================== */
+
+/* Telas menores que 900px */
+@media (max-width: 900px) {
+    .turmas-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .turmas-listagem, .turmas-formulario {
+        width: 100%;
+    }
+
+    .turmas-tabela th, .turmas-tabela td {
+        font-size: 0.9rem;
+    }
+}
+
+/* Telas menores que 600px */
+@media (max-width: 600px) {
+    .turmas-faixa-container {
+        flex-direction: column;
+    }
+
+    .turmas-faixa-container input {
+        text-align: left;
+    }
+
+    .turmas-professores-lista {
+        flex-direction: column;
+    }
+
+    .turmas-submit button{
+        font-size: 0.5rem;
+    }
+
+    .turmas-tabela th, .turmas-tabela td {
+        font-size: 0.7rem;
+    }
+
+    .turmas-tabela tbody td {
+        font-size: 0.6rem; /* Fonte menor para melhor ajuste no mobile */
+    }
+
+    .turmas-formulario h2{
+        font-size: 1.2rem;
+    }
+
+    .turmas-formulario h3{
+        font-size: 0.9rem;
+    }
+
+    .turmas-formulario label{
+        font-size: 0.9rem;
+    }
+
+    .turmas-formulario input{
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .turmas-select{
+        padding: 5px;
+    }
+}
+
+
+@media (min-width: 768px){
+    .turmas-container{
+        margin-top: 3.4rem;
+    }
+}

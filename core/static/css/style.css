@@ -1,0 +1,637 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+/* ========================== */
+/*      VARIÁVEIS GERAIS      */
+/* ========================== */
+:root {
+    --primary-color: #1f4622; /* Verde escuro da Igreja Presbiteriana */
+    --text-color: white;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(0, 0, 0, 0.1);
+    font-family: Poppins;
+}
+
+body{
+    background-color: rgba(239, 239, 239, 0.612);
+}
+
+/* ========================== */
+/*         ESTILO NAVBAR      */
+/* ========================== */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--primary-color);
+    padding: 1rem;
+    position: relative;
+    z-index: 1000;
+}
+
+/* Ajuste para manter a logo à esquerda */
+.logo {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 3rem;
+}
+
+/* Botão do menu hamburguer */
+.menu-toggle {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--text-color);
+    cursor: pointer;
+    display: none; /* Oculto por padrão */
+}
+
+
+/* Estilos do menu principal */
+.nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    background-color: var(--primary-color);
+}
+
+.nav-links li {
+    position: relative;
+}
+
+.nav-links a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    display: block;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: var(--primary-color);
+    min-width: 160px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+    z-index: 1;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 5px;
+    top: 100%;
+    left: 0;
+}
+
+.dropdown-menu li {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dropdown-menu li:last-child {
+    border-bottom: none;
+}
+
+.dropdown-menu a {
+    color: var(--text-color);
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown-menu.show {
+    display: block;
+}
+
+/* ========================== */
+/*      ESTILO DOS CARDS      */
+/* ========================== */
+
+.dashboard {
+    margin-top: 6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+}
+
+.card-container {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    max-width: 95%;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+    text-align: center;
+    width: 30.5%;
+}
+
+.card h3 {
+    margin-bottom: 0.5rem;
+}
+
+/* ========================== */
+/*      ESTILO DO GRÁFICO     */
+/* ========================== */
+
+.chart-and-birthday-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 95%;
+    margin: 2rem auto;
+    align-items: center;
+}
+
+.chart-section {
+    flex: 2;
+    max-width: 100%;
+    min-height: 400px; /* Aumenta a altura do gráfico */
+    margin-top: 3rem;
+}
+
+canvas {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ========================== */
+/*    ESTILO DO CARD DE ANIVERSARIANTES */
+/* ========================== */
+
+.birthday-section {
+    flex: 1;
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2.4rem;
+}
+
+.birthday-card {
+    background: var(--card-bg);
+    padding: 1.4rem;
+    border-radius: 0.5rem;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+    width: 100%;
+    text-align: center;
+    height: 100%;
+}
+
+.birthday-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.birthday-navigation button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.birthday-navigation button:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+/* ========================== */
+/*        ESTILOS POR ID      */
+/* ========================== */
+
+#month-select {
+    padding: .3rem 6rem .3rem .3rem;
+    border-radius: 14px;
+    font-weight: 600;
+    margin-left: 1.6rem;
+}
+
+#month-select-label {
+    margin-left: 1.6rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+/* ========================== */
+/*   ESTILO DOS MODAIS        */
+/* ========================== */
+
+.modal-cadastro {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-cadastro-content {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+}
+
+/* ========================== */
+/*       BOTÕES GERAIS        */
+/* ========================== */
+
+.button-submit {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: Poppins;
+}
+
+.button-submit:hover {
+    background: #145214;
+}
+
+/* ========================== */
+/*       RESPONSIVIDADE       */
+/* ========================== */
+
+/* Ajuste do menu hamburguer */
+@media (max-width: 600px) {
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 1rem;
+    }
+
+    /* Mantém o logotipo à esquerda */
+    .logo {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    /* Garante que o menu hambúrguer fique à direita */
+    .menu-toggle {
+        display: block;
+        position: absolute;
+        right: 15px; /* Move para o lado direito */
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.8rem;
+    }
+
+    /* Ajuste no menu para aparecer corretamente */
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        background-color: var(--primary-color);
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        padding: 1rem 0;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links li {
+        text-align: center;
+        padding: 0.8rem 0;
+    }
+
+    .dropdown-menu {
+        position: relative;
+        width: 100%;
+        text-align: center;
+    }
+
+    .card{
+        width: 33%;
+        padding: .6rem;
+    }
+    .card-container{
+        display: flex;flex-direction: row;
+        gap: .4rem;
+    }
+    .chart-section{
+        margin-top: 1.5rem;
+    }
+    .card h3{
+        font-size: 8px;
+    }
+}
+
+    .card{
+        width: 33%;
+        padding: .6rem;
+    }
+    .card-container{
+        display: flex;flex-direction: row;
+        gap: .4rem;
+    }
+    .chart-section{
+        margin-top: 1.5rem;
+    }
+
+
+@media (max-width: 500px) {
+    .chart-and-birthday-container {
+        flex-wrap: wrap;
+        gap: 0; 
+    }
+
+    .chart-section,
+    .birthday-section {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .chart-section {
+        min-height: 220px; /* Mantém um tamanho adequado no mobile */
+    }
+
+    canvas {
+        height: 170px !important; /* Mantém o gráfico proporcional */
+    }
+}
+
+/* Ajuste da Legenda do Gráfico */
+@media (min-width: 501px) and (max-width: 600px) {
+    .chart-section .chartjs-size-monitor,
+    .chart-section canvas {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 100%;
+    }
+
+    .chartjs-size-monitor {
+        width: 100%;
+    }
+
+    .chart-section canvas {
+        height: 220px !important; /* Evita distorção */
+    }
+
+    /* Ajusta rótulos inclinados no eixo X */
+    .chart-section .chartjs-size-monitor canvas {
+        transform: rotate(0deg); /* Mantém os rótulos mais organizados */
+    }
+}
+
+@media (max-width:1400px){
+    .dashboard{
+        margin-top: 2rem;
+    }
+}
+
+@media (min-width: 1301px) {
+    
+    .chart-section{
+        height: 600px;
+    }
+
+    .birthday-section{
+        width:60%;
+    }
+
+    .birthday-card{
+        width: 70%;
+    }
+
+}
+
+
+
+/*ESTILOS DOS MODAIS DE CADASTRO*/
+/* ========================== */
+/*       ESTILOS GERAIS       */
+/* ========================== */
+
+.modal-cadastro {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-cadastro-content {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+}
+
+/* ========================== */
+/*       MODAL DE TURMA       */
+/* ========================== */
+
+#modal-cadastro-content-turma {
+    max-width: 600px;
+}
+
+#modal-cadastro-turma .form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+#modal-cadastro-turma .form-group-nome-turma {
+    width: 50%;
+}
+
+#modal-cadastro-turma .faixa-etaria {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+#modal-cadastro-turma .inputs-faixa-etaria-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+#modal-cadastro-turma .inputs-faixa-etaria-container input {
+    width: 100%;
+    text-align: center;
+}
+
+#modal-cadastro-turma input{
+    border-radius: 10px;
+    padding: 4px 23px;
+    border: 1px solid rgb(103, 103, 103);
+}
+
+/* ========================== */
+/*     MODAL DE PROFESSOR     */
+/* ========================== */
+
+#modal-cadastro-content-professor {
+    max-width: 500px;
+}
+
+#modal-cadastro-professor .form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+#modal-cadastro-professor .form-group-nome-completo {
+    width: 50%;
+}
+
+#modal-cadastro-professor .form-group-nascimento {
+    width: 50%;
+}
+
+
+#modal-cadastro-professor input{
+    border-radius: 10px;
+    padding: 4px 23px;
+    border: 1px solid rgb(103, 103, 103);
+}
+/* ========================== */
+/*       MODAL DE ALUNO       */
+/* ========================== */
+
+#modal-cadastro-content-aluno {
+    max-width: 500px;
+}
+
+#modal-cadastro-aluno .form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+#modal-cadastro-aluno .form-group-nome-completo {
+    width: 50%;
+}
+
+#modal-cadastro-aluno .form-group-nascimento {
+    width: 50%;
+}
+#modal-cadastro-aluno input{
+    border-radius: 10px;
+    padding: 4px 23px;
+    border: 1px solid rgb(103, 103, 103);
+}
+
+/* ========================== */
+/*       ESTILO DOS BOTÕES    */
+/* ========================== */
+
+.button-submit {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-family: Poppins;
+}
+
+.button-submit:hover {
+    background: #145214;
+}
+
+/* ========================== */
+/*      RESPONSIVIDADE        */
+/* ========================== */
+
+@media (max-width: 600px) {
+    .modal-cadastro-content {
+        width: 65%;
+    }
+
+    #modal-cadastro-turma .form-row,
+    #modal-cadastro-professor .form-row,
+    #modal-cadastro-aluno .form-row {
+        flex-direction: column;
+    }
+
+    #modal-cadastro-turma .form-group-nome-turma,
+    #modal-cadastro-turma .faixa-etaria,
+    #modal-cadastro-professor .form-group-nome-completo,
+    #modal-cadastro-professor .form-group-nascimento,
+    #modal-cadastro-aluno .form-group-nome-completo,
+    #modal-cadastro-aluno .form-group-nascimento {
+        width: 100%;
+    }
+
+}
+
+
+.modal-cadastro-header {
+    display: flex;
+    justify-content: space-between; /* Garante alinhamento correto */
+    align-items: center;
+    position: relative;
+}
+
+.modal-cadastro-close {
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: absolute;
+    top: 1rem; /* Distância do topo */
+    right: 1.5rem; /* Distância da direita */
+    background: none;
+    border: none;
+    color: #333; /* Cor escura para contraste */
+    font-weight: bold;
+}
+
+.modal-cadastro-close:hover {
+    color: red; /* Destaca ao passar o mouse */
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 600px) {
+    .modal-cadastro-close {
+        top: 0.8rem;
+        right: 1rem;
+    }
+}

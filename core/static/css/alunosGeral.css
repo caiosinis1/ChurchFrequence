@@ -1,0 +1,229 @@
+/* ========================== */
+/*    ESTILO GERAL DA PÁGINA  */
+/* ========================== */
+
+.alunos-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 2rem;
+}
+
+/* ========================== */
+/*      ESTILO DA TABELA      */
+/* ========================== */
+
+.alunos-listagem {
+    flex: 2;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+    color: black;
+}
+
+.alunos-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    color: black;
+}
+
+.alunos-tabela th, .alunos-tabela td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    color: black;
+}
+
+.alunos-tabela th {
+    font-weight: bold;
+    color: black;
+}
+
+/* ========================== */
+/*   ESTILO DO FORMULÁRIO     */
+/* ========================== */
+
+.alunos-formulario {
+    flex: 1;
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+}
+
+#alunos-turma{
+    padding: 0.5rem;
+
+border-radius: 6px;}
+
+.alunos-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.alunos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.alunos-titulo-form {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.alunos-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.alunos-form-group label {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+.alunos-form-group input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* ========================== */
+/*  ESTILO DO INPUT PESQUISA  */
+/* ========================== */
+
+.alunos-pesquisa-container {
+    position: relative;
+}
+
+.alunos-pesquisa {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.alunos-sugestoes {
+    position: absolute;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    list-style: none;
+    padding: 0;
+    margin-top: 5px;
+    display: none;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.alunos-sugestoes li {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.alunos-sugestoes li:hover {
+    background: #f0f0f0;
+}
+
+/* ========================== */
+/*      BOTÃO DE CONCLUIR     */
+/* ========================== */
+
+.alunos-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.alunos-submit:hover {
+    background: #145214;
+}
+
+/* ========================== */
+/*      RESPONSIVIDADE        */
+/* ========================== */
+
+/* Telas menores que 900px */
+@media (max-width: 900px) {
+    .alunos-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .alunos-listagem, .alunos-formulario {
+        width: 100%;
+    }
+
+    .alunos-tabela th, .alunos-tabela td {
+        font-size: 0.9rem;
+    }
+}
+
+/* Telas menores que 600px */
+@media (max-width: 600px) {
+    /* Reduzindo a fonte da tabela */
+    .alunos-tabela th, .alunos-tabela td,
+    .professores-tabela th, .professores-tabela td {
+        font-size: 0.6rem;
+        padding: 5px;
+    }
+
+    .alunos-listagem, .professores-listagem {
+        overflow-x: auto;
+        display: block;
+    }
+
+    .alunos-tabela, .professores-tabela {
+        min-width: 500px;
+        display: block;
+    }
+
+    .alunos-formulario h2,
+    .professores-formulario h2 {
+        font-size: 1.2rem;
+    }
+
+    .alunos-formulario label,
+    .professores-formulario label {
+        font-size: 0.9rem;
+    }
+
+    .alunos-formulario input,
+    .professores-formulario input,
+    .alunos-formulario select,
+    .professores-formulario select {
+        font-size: 0.9rem;
+        padding: 6px;
+    }
+
+    .alunos-submit, .professores-submit {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+}
+
+    #alunos-turma{
+        padding: 5px;
+    }
+
+
+@media (min-width: 768px){
+    .alunos-container{
+        margin-top: 3.4rem;
+    }
+}

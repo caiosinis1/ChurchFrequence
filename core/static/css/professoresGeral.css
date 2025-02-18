@@ -1,0 +1,239 @@
+/* ========================== */
+/*    ESTILO GERAL DA PÁGINA  */
+/* ========================== */
+
+.professores-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 2rem;
+}
+
+/* ========================== */
+/*      ESTILO DA TABELA      */
+/* ========================== */
+
+.professores-listagem {
+    flex: 2;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+    color: black;
+}
+
+.professores-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    color: black;
+}
+
+.professores-tabela th, .professores-tabela td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    color: black;
+}
+
+.professores-tabela th {
+    font-weight: bold;
+    color: black;
+}
+
+/* ========================== */
+/*   ESTILO DO FORMULÁRIO     */
+/* ========================== */
+
+.professores-formulario {
+    flex: 1;
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+}
+
+.professores-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.professores-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.professores-titulo-form {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.professores-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.professores-form-group label {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+.professores-form-group input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* ========================== */
+/*  ESTILO DO INPUT PESQUISA  */
+/* ========================== */
+
+.professores-pesquisa-container {
+    position: relative;
+}
+
+.professores-pesquisa {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.professores-sugestoes {
+    position: absolute;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    list-style: none;
+    padding: 0;
+    margin-top: 5px;
+    display: none;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.professores-sugestoes li {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.professores-sugestoes li:hover {
+    background: #f0f0f0;
+}
+
+/* ========================== */
+/*      BOTÃO DE CONCLUIR     */
+/* ========================== */
+
+.professores-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.professores-submit:hover {
+    background: #145214;
+}
+
+/* ========================== */
+/*      RESPONSIVIDADE        */
+/* ========================== */
+
+/* Para telas menores que 900px */
+@media (max-width: 900px) {
+    .professores-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .professores-listagem, .professores-formulario {
+        width: 100%;
+    }
+
+    .professores-tabela th, .professores-tabela td {
+        font-size: 0.9rem;
+    }
+}
+
+/* Para telas menores que 600px */
+@media (max-width: 600px) {
+    .professores-tabela th {
+        font-size: 0.8rem;
+    }
+
+    .professores-tabela td {
+        font-size: 0.7rem; /* Reduz ainda mais os dados para caber melhor */
+        padding: 5px;
+    }
+
+    .professores-formulario h2 {
+        font-size: 1.2rem;
+    }
+
+    .professores-formulario h3 {
+        font-size: 1rem;
+    }
+
+    .professores-formulario label {
+        font-size: 0.9rem;
+    }
+
+    .professores-formulario input {
+        padding: 0.4rem;
+    }
+
+    .professores-pesquisa {
+        font-size: 0.9rem;
+        padding: 0.4rem;
+    }
+
+    .professores-sugestoes {
+        font-size: 0.9rem;
+    }
+
+    .professores-submit {
+        font-size: 0.8rem;
+        padding: 0.6rem;
+    }
+}
+
+/* Para telas menores que 400px */
+@media (max-width: 600px) {
+    .professores-tabela th {
+        font-size: 0.7rem;
+    }
+
+    .professores-tabela td {
+        font-size: 0.6rem; /* Mantém a legibilidade sem quebrar layout */
+    }
+
+    .professores-formulario h2 {
+        font-size: 1rem;
+    }
+
+    .professores-submit {
+        font-size: 0.7rem;
+        padding: 0.5rem;
+    }
+}
+
+
+@media (min-width: 768px){
+    .professores-container{
+        margin-top: 3.4rem;
+    }
+}

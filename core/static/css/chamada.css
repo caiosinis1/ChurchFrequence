@@ -1,0 +1,98 @@
+/* ========================== */
+/*    ESTILO DA PÁGINA DE CHAMADA  */
+/* ========================== */
+
+.chamada-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    padding: 2rem;
+}
+
+.chamada-card {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px var(--card-shadow);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.chamada-card h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.chamada-card select {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.chamada-card h3 {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+}
+
+#lista-alunos-chamada {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+#lista-alunos-chamada p {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.aluno-item-chamada {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.botao-chamada {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    width: 100%;
+}
+
+.botao-chamada:hover {
+    background: #145214;
+}
+
+/* ========================== */
+/*       RESPONSIVIDADE       */
+/* ========================== */
+
+@media (max-width: 500px) {
+    .chamada-container {
+        padding: 1rem;
+        height: auto;
+    }
+
+    .chamada-card {
+        width: 90%;
+    }
+}

@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+/* ========================== */
+/*      VARIÁVEIS GERAIS      */
+/* ========================== */
+:root {
+    --primary-color: #1f4622; /* Verde escuro da Igreja Presbiteriana */
+    --text-color: white;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(0, 0, 0, 0.1);
+    font-family: Poppins;
+}
+
+body{
+    background-color: --primary-color;
+}
+
+.container-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 97vh;
+}
+
+.logotipo, .logotipo img{
+    max-width: 900px;
+}
+
+.text{
+    font-size: 1.4rem;
+    color: #d8d8d8;
+    font-weight: bold;
+    margin-top: 1.4rem;
+    text-align: center;
+}
+
+.button {
+    display: inline-block;
+    padding: 0.75rem 6.25rem;
+    border-radius: 10rem;
+    color: #fff;
+    font-size: 1.2rem;
+    letter-spacing: 0.1rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    background-color: #19381b; 
+    border: 1px solid rgb(53, 53, 53);
+    margin-top: 1.4rem;
+}
+
+.button::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #19381b; 
+    border-radius: 10rem;
+    z-index: -2;
+}
+
+.button::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background-color: #145214; 
+    transition: all 0.3s;
+    border-radius: 10rem;
+    z-index: -1;
+}
+
+.button:hover {
+    color: #fff;
+    cursor: pointer;
+}
+
+.button:hover::before {
+    width: 100%;
+}
+
+/* ========================== */
+/*      ESTILIZAÇÃO DO MODAL  */
+/* ========================== */
+
+.modal {
+    display: none; /* Mantém o modal oculto até ser acionado pelo JavaScript */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+.form-group input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+@media (max-width: 700px){
+    .logotipo img{
+        width: 70%;
+    }
+    .logotipo{
+        display: flex;
+        justify-content: center;
+    }
+
+    .text{
+        width: 81%;
+        font-size: 0.6rem;
+    }
+
+    .button{
+        padding: 0.65rem 5.25rem;
+        font-size: 0.9rem;
+        font-weight: bold;
+        letter-spacing: 0;
+    }
+
+    .modal-content{
+        width: 70%;
+    }
+
+    .modal-content label{
+        font-size: 0.8rem;
+    }
+
+    .modal-content h2{
+        font-size: 1.3rem;
+    }
+
+    .modal-content input{
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+}
+
+/* Loader dentro do botão */
+.loader {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid white;
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
