@@ -47,6 +47,10 @@
 /*   ESTILO DO FORMULÁRIO     */
 /* ========================== */
 
+.alunos-formulario h2{
+    text-align: center;
+}
+
 .alunos-formulario {
     flex: 1;
     background: var(--card-bg);
@@ -67,9 +71,9 @@ border-radius: 6px;}
 
 .alunos-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
 }
 
 .alunos-titulo-form {

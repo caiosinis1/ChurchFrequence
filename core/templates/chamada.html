@@ -68,14 +68,15 @@
     </main>
 
      <!--MODAIS-->
-     <!-- Modal de Cadastro de Turma -->
-     <div id="modal-cadastro-turma" class="modal-cadastro">
+    <!-- Modal de Cadastro de Turma -->
+    <div id="modal-cadastro-turma" class="modal-cadastro">
         <div id="modal-cadastro-content-aluno" class="modal-cadastro-content">
             <div class="modal-cadastro-header">
                 <h2>Cadastrar Nova Turma</h2>
                 <span class="modal-cadastro-close" id="fechar-modal-cadastro-turma">&times;</span>
             </div>
-            <form id="form-cadastro-turma">
+            <form id="form-cadastro-turma" method="post">
+                {% csrf_token %}
                 <div class="form-row">
                     <div class="form-group-nome-turma">
                         <label for="nome-turma">Nome da Turma:</label>
@@ -107,7 +108,8 @@
             <h2>Cadastrar Novo Professor</h2>
             <span class="modal-cadastro-close" id="fechar-modal-cadastro-professor">&times;</span>
         </div>
-        <form id="form-cadastro-professor">
+        <form id="form-cadastro-professor" method="post">
+            {% csrf_token %}
             <div class="form-row">
                 <div class="form-group-nome-completo">
                     <label for="nome-professor">Nome Completo:</label>
@@ -120,8 +122,11 @@
             </div>
             <h3>Turmas:</h3>
             <div class="modal-cadastro-opcoes" id="turmas-professor">
-                <label><input type="checkbox" name="turma-professor" value="Turma 1"> Turma 1</label>
-                <label><input type="checkbox" name="turma-professor" value="Turma 2"> Turma 2</label>
+                {% for turma in turmas %}
+                    <label><input type="checkbox" name="turma-professor" value="{{ turma.id }}"> {{ turma.nome }}</label>
+                {% empty %}
+                    <p>Nenhuma turma cadastrada</p>
+                {% endfor %}
             </div>
             <button class="button-submit" type="submit">Cadastrar</button>
         </form>
@@ -135,23 +140,29 @@
                 <h2>Cadastrar Novo Aluno</h2>
                 <span class="modal-cadastro-close" id="fechar-modal-cadastro-aluno">&times;</span>
             </div>
-            <form id="form-cadastro-aluno">
+            <form id="form-cadastro-aluno" method="post">
+                {% csrf_token %}
                 <div class="form-row">
                     <div class="form-group-nome-completo">
                         <label for="nome-aluno">Nome Completo:</label>
-                        <input type="text" id="nome-aluno" name="nome-aluno" required>
+                        <input type="text" id="nome-aluno" name="nome" required>
                     </div>
                     <div class="form-group-nascimento">
                         <label for="data-nascimento-aluno">Data de Nascimento:</label>
                         <input type="date" id="data-nascimento-aluno" name="data-nascimento-aluno" required>
                     </div>
                 </div>
+            
                 <h3>Turma:</h3>
-                <div class="modal-cadastro-opcoes" id="turmas-aluno">
-                    <label><input type="radio" name="turma" value="Turma 1"> Turma 1</label>
-                    <label><input type="radio" name="turma" value="Turma 2"> Turma 2</label>
-                    <label><input type="radio" name="turma" value="Turma 3"> Turma 3</label>
-                </div>
+                <select id="turma" name="turma" required>
+                    <option value="">-- Escolha uma turma --</option>
+                    {% for turma in turmas %}
+                        <option value="{{ turma.id }}">{{ turma.nome }}</option>
+                    {% empty %}
+                        <option value="" disabled>Nenhuma turma cadastrada</option>
+                    {% endfor %}
+                </select>
+
                 <button class="button-submit" type="submit">Cadastrar</button>
             </form>
         </div>

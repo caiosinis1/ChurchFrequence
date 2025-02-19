@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home, turmas_geral, professores_geral, alunos_geral, chamada, cadastrar_turma, cadastrar_aluno, listar_turmas,cadastrar_professor,obter_totais, atualizar_turma, detalhar_turma, listar_turmas_completas, listar_professores
+from .views import home, turmas_geral, professores_geral, alunos_geral, chamada, cadastrar_turma, cadastrar_aluno, listar_turmas,cadastrar_professor,obter_totais, atualizar_turma, detalhar_turma, listar_turmas_completas, listar_professores, listar_alunos, detalhar_aluno, atualizar_aluno, listar_professores_geral,  atualizar_professor, detalhar_professor
 
 urlpatterns = [
     path('', home, name='home'),
@@ -16,6 +16,12 @@ urlpatterns = [
     path("detalhar_turma/<int:turma_id>/", detalhar_turma, name="detalhar_turma"),
     path("listar_turmas_completas/", listar_turmas_completas, name="listar_turmas_completas"),
     path("listar_professores/", listar_professores, name="listar_professores"),
+    path("listar_professores_geral/", listar_professores_geral, name="listar_professores_geral"),
+    path("detalhar_professor/<int:professor_id>/", detalhar_professor, name="detalhar_professor"),
+    path("atualizar_professor/", atualizar_professor, name="atualizar_professor"),
+    path("listar_alunos/", listar_alunos, name="listar_alunos"),
+    path('detalhar_aluno/<int:aluno_id>/', detalhar_aluno, name='detalhar_aluno'),
+    path("atualizar_aluno/", atualizar_aluno, name="atualizar_aluno"),
 
 
 ]

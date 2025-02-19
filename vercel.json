@@ -1,0 +1,15 @@
+{
+    "builds": [
+      {
+        "src": "controle_presenca/wsgi.py",
+        "use": "@vercel/python"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "controle_presenca/wsgi.py"
+      }
+    ]
+  }
+  

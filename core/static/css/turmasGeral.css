@@ -74,9 +74,9 @@
 
 .turmas-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
 }
 
 .turmas-titulo-form {

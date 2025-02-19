@@ -1,33 +1,184 @@
-// JS para autocomplete da pesquisa de professores
-const professores = ["Carlos Souza", "Ana Lima", "Fernanda Oliveira", "Gabriel Santos"];
-const inputPesquisa = document.getElementById("professor-pesquisa");
-const listaSugestoes = document.getElementById("professores-sugestoes");
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("✅ professoresGeral.js carregado!");
 
-inputPesquisa.addEventListener("input", function() {
-    const valor = this.value.toLowerCase();
-    listaSugestoes.innerHTML = "";
+    let professorSelecionadoId = null;
 
-    if (valor.length > 0) {
-        const sugestoes = professores.filter(nome => nome.toLowerCase().includes(valor));
-        
-        sugestoes.forEach(nome => {
-            const item = document.createElement("li");
-            item.textContent = nome;
-            item.addEventListener("click", function() {
-                inputPesquisa.value = nome;
+    /* 🔹 Função para carregar os professores na tabela */
+    function carregarProfessores() {
+        fetch("/listar_professores_geral/")
+            .then(response => response.json())
+            .then(data => {
+                console.log("📌 Professores recebidos:", data);
+
+                const tabelaBody = document.getElementById("professores-tabela-body");
+                tabelaBody.innerHTML = ""; // Limpa a tabela antes de inserir novos dados
+
+                data.professores.forEach(professor => {
+                    let row = document.createElement("tr");
+
+                    let turmas = professor.turmas.length > 0 ? professor.turmas.join(", ") : "Nenhuma turma";
+                    let aniversario = professor.aniversario || "N/A";
+
+                    row.innerHTML = `
+                        <td>${professor.nome}</td>
+                        <td>${turmas}</td>
+                        <td>${aniversario}</td>
+                    `;
+
+                    // Adiciona evento de clique para carregar os dados no formulário de edição
+                    row.addEventListener("click", function () {
+                        preencherDadosProfessor(professor.id);
+                    });
+
+                    tabelaBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error("❌ Erro ao buscar professores:", error));
+    }
+
+    /* 🔹 Função para preencher os detalhes do professor no formulário de edição */
+    function preencherDadosProfessor(professorId) {
+        fetch(`/detalhar_professor/${professorId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "sucesso") {
+                    let professor = data.professor;
+                    console.log("📌 Detalhes do professor recebidos:", professor);
+
+                    professorSelecionadoId = professor.id;
+                    document.getElementById("professores-nome").value = professor.nome;
+                    
+                    // ✅ Corrigindo a data de nascimento (Ajustando para o formato YYYY-MM-DD)
+                    if (professor.data_nascimento) {
+                        let dataFormatada = professor.data_nascimento.split("/").reverse().join("-");
+                        document.getElementById("professores-aniversario").value = dataFormatada;
+                    } else {
+                        document.getElementById("professores-aniversario").value = "";
+                    }
+
+                    // ✅ Carregar todas as turmas e marcar as do professor
+                    carregarTurmasProfessor(professor.turmas);
+                } else {
+                    console.error("Erro ao buscar detalhes do professor:", data.mensagem);
+                }
+            })
+            .catch(error => console.error("❌ Erro ao buscar professor:", error));
+    }
+
+    /* 🔹 Função para carregar todas as turmas e marcar as do professor */
+    function carregarTurmasProfessor(turmasProfessor) {
+        fetch("/listar_turmas/")
+            .then(response => response.json())
+            .then(data => {
+                console.log("📌 Turmas recebidas para professor:", data);
+
+                let listaTurmas = document.getElementById("professores-turmas");
+                listaTurmas.innerHTML = ""; // Limpa antes de carregar
+
+                data.turmas.forEach(turma => {
+                    let isChecked = turmasProfessor.includes(turma.id) ? "checked" : "";
+
+                    let label = document.createElement("label");
+                    label.innerHTML = `<input type="checkbox" name="professores-turma" value="${turma.id}" ${isChecked}> ${turma.nome}`;
+                    listaTurmas.appendChild(label);
+                });
+            })
+            .catch(error => console.error("❌ Erro ao buscar turmas:", error));
+    }
+
+    /* 🔹 Função para buscar professores e preencher sugestões */
+    function buscarProfessores(termo) {
+        fetch("/listar_professores_geral/")
+            .then(response => response.json())
+            .then(data => {
+                let listaSugestoes = document.getElementById("professores-sugestoes");
                 listaSugestoes.innerHTML = "";
-            });
-            listaSugestoes.appendChild(item);
+                
+                let resultados = data.professores.filter(prof => prof.nome.toLowerCase().includes(termo.toLowerCase()));
+
+                if (resultados.length > 0) {
+                    listaSugestoes.style.display = "block";
+
+                    resultados.forEach(professor => {
+                        let item = document.createElement("li");
+                        item.textContent = professor.nome;
+                        item.addEventListener("click", function () {
+                            document.getElementById("professor-pesquisa").value = professor.nome;
+                            listaSugestoes.style.display = "none";
+                            preencherDadosProfessor(professor.id);
+                        });
+                        listaSugestoes.appendChild(item);
+                    });
+                } else {
+                    listaSugestoes.style.display = "none";
+                }
+            })
+            .catch(error => console.error("Erro ao buscar professores:", error));
+    }
+
+    /* 🔹 Captura a entrada na pesquisa */
+    document.getElementById("professor-pesquisa")?.addEventListener("input", function () {
+        let termo = this.value.trim();
+        if (termo.length > 0) {
+            buscarProfessores(termo);
+        } else {
+            document.getElementById("professores-sugestoes").style.display = "none";
+        }
+    });
+
+    /* 🔹 Atualizar professor */
+    document.getElementById("professores-form")?.addEventListener("submit", function (event) {
+        event.preventDefault(); // Previne o recarregamento da página
+
+        if (!professorSelecionadoId) {
+            Swal.fire("Erro", "Selecione um professor para editar.", "error");
+            return;
+        }
+
+        let nome = document.getElementById("professores-nome").value;
+        let dataNascimento = document.getElementById("professores-aniversario").value;
+        
+        let turmas = [];
+        document.querySelectorAll("input[name='professores-turma']:checked").forEach(checkbox => {
+            turmas.push(parseInt(checkbox.value));
         });
 
-        listaSugestoes.style.display = "block";
-    } else {
-        listaSugestoes.style.display = "none";
-    }
-});
+        fetch("/atualizar_professor/", {
+            method: "POST",
+            body: JSON.stringify({
+                id: professorSelecionadoId,
+                nome: nome,
+                data_nascimento: dataNascimento,
+                turmas: turmas
+            }),
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "sucesso") {
+                Swal.fire("Sucesso!", "Professor atualizado com sucesso!", "success").then(() => {
+                    carregarProfessores();
+                });
+            } else {
+                Swal.fire("Erro", data.mensagem, "error");
+            }
+        })
+        .catch(error => console.error("❌ Erro ao atualizar professor:", error));
+    });
 
-document.addEventListener("click", function(event) {
-    if (!listaSugestoes.contains(event.target) && event.target !== inputPesquisa) {
-        listaSugestoes.style.display = "none";
-    }
+    /* 🔹 Fecha sugestões ao clicar fora */
+    document.addEventListener("click", function (event) {
+        let listaSugestoes = document.getElementById("professores-sugestoes");
+        let inputPesquisa = document.getElementById("professor-pesquisa");
+
+        if (!listaSugestoes.contains(event.target) && event.target !== inputPesquisa) {
+            listaSugestoes.style.display = "none";
+        }
+    });
+
+    /* 🔹 Chama a função para carregar os professores ao carregar a página */
+    carregarProfessores();
 });

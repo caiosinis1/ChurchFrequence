@@ -290,6 +290,10 @@ canvas {
         padding: 0.8rem 1rem;
     }
 
+    .modal-cadastro-opcoes{
+        text-align: left;
+    }
+
     /* Mantém o logotipo à esquerda */
     .logo {
         flex: 1;
@@ -348,6 +352,14 @@ canvas {
     }
     .card h3{
         font-size: 8px;
+    }
+
+    .modal-cadastro h2{
+        font-size: 1.2rem;
+    }
+
+    .modal-cadastro label{
+        font-size: 0.8rem;
     }
 }
 
