@@ -14,11 +14,13 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Turma
 import json
 import random
-
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from core.models import Turma
 import uuid
+from .models import Aluno, Presenca
+from datetime import datetime, date
+
 
 
 def index(request):
@@ -380,3 +382,182 @@ def listar_turmas_completas(request):
 def listar_turmas_pagina(request):
     turmas = Turma.objects.all()
     return render(request, 'turmasGeral.html', {'turmas': turmas})
+
+
+
+#CODIGOS REFERENTES A CHAMADA
+# 🔹 Função para salvar a chamada
+@csrf_exempt
+def salvar_chamada(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            turma_id = data.get("turma_id")
+            domingo = data.get("domingo")
+            registros = data.get("registros", [])
+
+            turma = get_object_or_404(Turma, id=turma_id)
+            data_chamada = datetime.today().date()
+
+            for registro in registros:
+                aluno_id = registro.get("aluno_id")
+                presente = registro.get("presente")
+
+                aluno = get_object_or_404(Aluno, id=aluno_id)
+
+                # Verifica se já existe um registro para esse aluno, turma e domingo
+                chamada_existente = Presenca.objects.filter(
+                    aluno=aluno,
+                    turma=turma,
+                    domingo=domingo,
+                    data=data_chamada
+                ).first()
+
+                if chamada_existente:
+                    # Atualiza a presença caso já tenha sido registrado
+                    chamada_existente.presente = presente
+                    chamada_existente.save()
+                else:
+                    # Cria um novo registro
+                    Presenca.objects.create(
+                        aluno=aluno,
+                        turma=turma,
+                        domingo=domingo,
+                        presente=presente,
+                        data=data_chamada
+                    )
+
+            return JsonResponse({"status": "sucesso", "mensagem": "Chamada salva com sucesso!"})
+
+        except Exception as e:
+            return JsonResponse({"status": "erro", "mensagem": f"Erro ao salvar chamada: {str(e)}"})
+
+    return JsonResponse({"status": "erro", "mensagem": "Método inválido."})
+
+
+# 🔹 Função para carregar uma chamada existente para edição
+def carregar_chamada(request):
+    turma_id = request.GET.get("turma_id")
+    domingo = request.GET.get("domingo")
+
+    if not turma_id or not domingo:
+        return JsonResponse({"status": "erro", "mensagem": "Turma e domingo são obrigatórios."})
+
+    turma = get_object_or_404(Turma, id=turma_id)
+    chamadas = Presenca.objects.filter(turma=turma, domingo=domingo)
+
+    alunos_presenca = []
+    for chamada in chamadas:
+        alunos_presenca.append({
+            "aluno_id": chamada.aluno.id,
+            "nome": chamada.aluno.nome,
+            "presente": chamada.presente
+        })
+
+    return JsonResponse({"status": "sucesso", "alunos": alunos_presenca})
+
+
+# 🔹 Função para listar os alunos de uma turma para chamada
+def listar_alunos_para_chamada(request):
+    turma_id = request.GET.get("turma_id")
+
+    if not turma_id:
+        return JsonResponse({"status": "erro", "mensagem": "Turma não selecionada."})
+
+    turma = get_object_or_404(Turma, id=turma_id)
+    alunos = turma.alunos.all().values("id", "nome")
+
+    return JsonResponse({"status": "sucesso", "alunos": list(alunos)})
+
+def listar_presenca(request):
+    turma_id = request.GET.get("turma")
+    mes = request.GET.get("mes")
+    ano = request.GET.get("ano")
+    domingo = request.GET.get("domingo")
+
+    if not turma_id or not mes or not ano or not domingo:
+        return JsonResponse({"status": "erro", "mensagem": "Parâmetros incompletos"}, status=400)
+
+    try:
+        # Converte os parâmetros para inteiros e gera a data correta
+        data_chamada = date(int(ano), int(mes), int(domingo))
+    except ValueError:
+        return JsonResponse({"status": "erro", "mensagem": "Data inválida. Verifique o domingo informado."}, status=400)
+
+    alunos = Aluno.objects.filter(turma_id=turma_id)
+    alunos_data = []
+    presentes = 0
+    faltantes = 0
+
+    for aluno in alunos:
+        presenca = Presenca.objects.filter(aluno=aluno, data=data_chamada).first()
+        presente = presenca.presente if presenca else False
+
+        if presente:
+            presentes += 1
+        else:
+            faltantes += 1
+
+        alunos_data.append({
+            "id": aluno.id,
+            "nome": aluno.nome,
+            "presente": presente
+        })
+
+    return JsonResponse({
+        "status": "sucesso",
+        "alunos": alunos_data,
+        "presentes": presentes,
+        "faltantes": faltantes
+    })
+
+
+@csrf_exempt
+def salvar_presenca(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            print("\n🔍 Dados recebidos pelo Django:", data)  # Log para debug
+
+            turma_id = data.get("turma_id")
+            mes = data.get("mes")
+            ano = data.get("ano")
+            domingo = data.get("domingo")
+            presencas = data.get("presencas")  # Lista de {aluno_id, presente}
+
+            # Verifica se todos os dados foram recebidos corretamente
+            if not all([turma_id, mes, ano, domingo, presencas]):
+                return JsonResponse({"status": "erro", "mensagem": "Dados incompletos!"}, status=400)
+
+            # Converte a data do domingo selecionado
+            data_chamada = datetime(int(ano), int(mes), 1)  # Primeiro dia do mês
+            while data_chamada.weekday() != 6:  # Encontra o primeiro domingo do mês
+                data_chamada = data_chamada.replace(day=data_chamada.day + 1)
+            for _ in range(int(domingo) - 1):  # Avança para o domingo correto
+                data_chamada = data_chamada.replace(day=data_chamada.day + 7)
+
+            turma = Turma.objects.get(id=turma_id)
+
+            # Processa cada presença
+            for item in presencas:
+                aluno_id = item["aluno_id"]
+                presente = item["presente"]
+
+                aluno = Aluno.objects.get(id=aluno_id)
+
+                # Atualiza ou cria a presença no banco de dados
+                presenca, created = Presenca.objects.update_or_create(
+                    aluno=aluno,
+                    turma=turma,
+                    data=data_chamada,
+                    domingo=domingo,
+                    defaults={"presente": presente},
+                )
+
+            return JsonResponse({"status": "sucesso", "mensagem": "Presença registrada com sucesso!"})
+
+        except Exception as e:
+            return JsonResponse({"status": "erro", "mensagem": f"Erro ao salvar presença: {str(e)}"}, status=500)
+
+    return JsonResponse({"status": "erro", "mensagem": "Método inválido."}, status=400)

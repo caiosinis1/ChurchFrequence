@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home, turmas_geral, professores_geral, alunos_geral, chamada, cadastrar_turma, cadastrar_aluno, listar_turmas,cadastrar_professor,obter_totais, atualizar_turma, detalhar_turma, listar_turmas_completas, listar_professores, listar_alunos, detalhar_aluno, atualizar_aluno, listar_professores_geral,  atualizar_professor, detalhar_professor
+from .views import home, turmas_geral, professores_geral, alunos_geral, chamada, cadastrar_turma, cadastrar_aluno, listar_turmas,cadastrar_professor,obter_totais, atualizar_turma, detalhar_turma, listar_turmas_completas, listar_professores, listar_alunos, detalhar_aluno, atualizar_aluno, listar_professores_geral,  atualizar_professor, detalhar_professor, listar_presenca, salvar_presenca
 
 urlpatterns = [
     path('', home, name='home'),
@@ -22,6 +22,8 @@ urlpatterns = [
     path("listar_alunos/", listar_alunos, name="listar_alunos"),
     path('detalhar_aluno/<int:aluno_id>/', detalhar_aluno, name='detalhar_aluno'),
     path("atualizar_aluno/", atualizar_aluno, name="atualizar_aluno"),
+    path("listar_presenca/", listar_presenca, name="listar_presenca"),
+    path('salvar_presenca/', salvar_presenca, name='salvar_presenca'),
 
 
 ]

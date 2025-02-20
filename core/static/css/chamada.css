@@ -1,98 +1,107 @@
-/* ========================== */
-/*    ESTILO DA PÁGINA DE CHAMADA  */
-/* ========================== */
-
 .chamada-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80vh;
-    padding: 2rem;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
 }
 
 .chamada-card {
-    background: var(--card-bg);
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px var(--card-shadow);
-    width: 100%;
-    max-width: 400px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    max-width: 100%;
     text-align: center;
-    margin-top: 2rem;
 }
 
 .chamada-card h2 {
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
+    font-size: 20px;
+    margin-bottom: 15px;
 }
 
-.chamada-card select {
+.chamada-card select, .chamada-card button {
     width: 100%;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
+    padding: 10px;
+    margin-top: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 1rem;
 }
 
-.chamada-card h3 {
-    margin-top: 1rem;
-    font-size: 1.2rem;
+.chamada-card button {
+    background-color: #1a4d2e;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-#lista-alunos-chamada {
+.chamada-card button:hover {
+    background-color: #163b24;
+}
+
+/* Lista de Alunos */
+.lista-alunos {
+    text-align: left;
+    margin-top: 10px;
+}
+
+.lista-alunos label {
+    display: block;
+    padding: 5px;
+}
+
+/* Estilização do gráfico de presença */
+.chamada-grafico {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    max-height: 250px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 0.5rem;
-    border-radius: 5px;
-    background: #f9f9f9;
-}
-
-#lista-alunos-chamada p {
-    font-size: 0.9rem;
-    color: #555;
-}
-
-.aluno-item-chamada {
-    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
 }
 
-.botao-chamada {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background: var(--primary-color);
-    color: var(--text-color);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1rem;
+.chamada-grafico h3 {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Ajuste do Canvas para evitar aumento infinito */
+.chamada-grafico canvas {
+    width: 250px !important;
+    height: 250px !important;
+}
+
+.grafico-card {
     width: 100%;
+    max-width: 400px; /* Limita a largura do gráfico */
+    height: 300px; /* Define uma altura fixa */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
 }
 
-.botao-chamada:hover {
-    background: #145214;
+#graficoPresenca {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 250px; /* Limita a altura do canvas do gráfico */
 }
 
-/* ========================== */
-/*       RESPONSIVIDADE       */
-/* ========================== */
 
-@media (max-width: 500px) {
+/* Responsividade */
+@media (max-width: 768px) {
     .chamada-container {
-        padding: 1rem;
-        height: auto;
-    }
-
-    .chamada-card {
-        width: 90%;
+        flex-direction: column;
+        align-items: center;
     }
 }

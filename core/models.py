@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 
+# Modelo de Turma
 class Turma(models.Model):
     nome = models.CharField(max_length=100, unique=True)
     faixa_etaria_de = models.IntegerField()
@@ -14,7 +15,6 @@ class Turma(models.Model):
 
     def __str__(self):
         return f"{self.nome} ({self.codigo})"
-
 
 
 # Modelo de Professor
@@ -31,10 +31,9 @@ class Professor(models.Model):
 
     def __str__(self):
         return f"{self.nome} ({self.matricula})"
-# Modelo de Aluno
-from django.db import models
-import uuid
 
+
+# Modelo de Aluno
 class Aluno(models.Model):
     nome = models.CharField(max_length=100)
     data_nascimento = models.DateField()
@@ -43,19 +42,27 @@ class Aluno(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.matricula:
-            self.matricula = str(uuid.uuid4().hex[:10]).upper()  # Gera matrícula única
+            self.matricula = str(uuid.uuid4().hex[:10]).upper()  # Gerando matrícula única
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.nome} ({self.matricula}) - {self.turma.nome}"
 
 
-# Modelo de Presença
+# Modelo de Presença com suporte a domingos específicos
 class Presenca(models.Model):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name="presencas")
-    data = models.DateField(auto_now_add=True)
+    turma = models.ForeignKey(Turma, on_delete=models.CASCADE, related_name="chamadas")
+    data = models.DateField()
+    domingo = models.IntegerField()  # Número do domingo do mês (1 a 5)
     presente = models.BooleanField(default=False)
 
+    class Meta:
+        unique_together = ('aluno', 'data')  # Evita duplicação de chamada para o mesmo aluno no mesmo dia
+
     def __str__(self):
-        return f"{self.aluno.nome} - {self.data} - {'Presente' if self.presente else 'Faltou'}"
+        return f"{self.aluno.nome} - {self.turma.nome} - {self.get_domingo_display()} - {'Presente' if self.presente else 'Faltou'}"
+
+    def get_domingo_display(self):
+        return f"Domingo {self.domingo}"
 
