@@ -23,6 +23,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td>${professor.nome}</td>
                         <td>${turmas}</td>
                         <td>${aniversario}</td>
+                        <td>
+                            <button class="btn-excluir-professor" data-professor-id="${professor.id}">🗑️</button>
+                        </td>
                     `;
 
                     // Adiciona evento de clique para carregar os dados no formulário de edição
@@ -36,6 +39,48 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => console.error("❌ Erro ao buscar professores:", error));
     }
 
+    /* 🔹 Função para excluir professor */
+    function excluirProfessor(professorId) {
+        Swal.fire({
+            title: "Tem certeza?",
+            text: "Essa ação não pode ser desfeita!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sim, excluir!",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/excluir_professor/${professorId}/`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "sucesso") {
+                        Swal.fire("Excluído!", data.mensagem, "success");
+                        carregarProfessores();
+                    } else {
+                        Swal.fire("Erro!", data.mensagem, "error");
+                    }
+                })
+                .catch(error => console.error("❌ Erro ao excluir professor:", error));
+            }
+        });
+    }
+
+    /* 🔹 Evento para clicar no botão de exclusão */
+    document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("btn-excluir-professor")) {
+            let professorId = event.target.dataset.professorId;
+            excluirProfessor(professorId);
+        }
+    });
+
     /* 🔹 Função para preencher os detalhes do professor no formulário de edição */
     function preencherDadosProfessor(professorId) {
         fetch(`/detalhar_professor/${professorId}/`)
@@ -48,7 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     professorSelecionadoId = professor.id;
                     document.getElementById("professores-nome").value = professor.nome;
                     
-                    // ✅ Corrigindo a data de nascimento (Ajustando para o formato YYYY-MM-DD)
                     if (professor.data_nascimento) {
                         let dataFormatada = professor.data_nascimento.split("/").reverse().join("-");
                         document.getElementById("professores-aniversario").value = dataFormatada;
@@ -56,7 +100,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         document.getElementById("professores-aniversario").value = "";
                     }
 
-                    // ✅ Carregar todas as turmas e marcar as do professor
                     carregarTurmasProfessor(professor.turmas);
                 } else {
                     console.error("Erro ao buscar detalhes do professor:", data.mensagem);

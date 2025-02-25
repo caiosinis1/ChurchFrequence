@@ -31,19 +31,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         <td>${aluno.turma}</td>
                         <td>${aniversario}</td>
                         <td>${aluno.matricula}</td>
+                        <td>
+                            <button class="btn-excluir-aluno" data-aluno-id="${aluno.id}"> 🗑️ </button>
+                        </td>
                     `;
                     tabelaBody.appendChild(row);
                 });
             })
             .catch(error => console.error("❌ Erro ao buscar alunos:", error));
-    }
-
-    // Função para formatar a data para exibição na tabela (dd/mm)
-    function formatarDataParaTabela(data) {
-        let dataObj = new Date(data);
-        let dia = dataObj.getUTCDate().toString().padStart(2, "0");
-        let mes = (dataObj.getUTCMonth() + 1).toString().padStart(2, "0");
-        return `${dia}/${mes}`;
     }
 
     // Função para carregar a lista de turmas no select
@@ -159,7 +154,49 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("❌ Erro ao atualizar aluno:", error));
     });
-    
+
+    // Função para excluir aluno
+    function excluirAluno(alunoId) {
+        Swal.fire({
+            title: "Tem certeza?",
+            text: "Essa ação não pode ser desfeita!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sim, excluir!",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/excluir_aluno/${alunoId}/`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "sucesso") {
+                        Swal.fire("Excluído!", data.mensagem, "success");
+                        carregarAlunos();
+                    } else {
+                        Swal.fire("Erro!", data.mensagem, "error");
+                    }
+                })
+                .catch(error => console.error("❌ Erro ao excluir aluno:", error));
+            }
+        });
+    }
+
+    // Evento para capturar clique no botão de exclusão
+    document.addEventListener("click", function (event) {
+        console.log('ola')
+        if (event.target.classList.contains("btn-excluir-aluno")) {
+            let alunoId = event.target.dataset.alunoId;
+            excluirAluno(alunoId);
+        }
+    });
 
     // Ocultar sugestões ao clicar fora
     document.addEventListener("click", function (e) {

@@ -43,6 +43,10 @@
     color: black;
 }
 
+tbody td{
+    font-size: 12px;
+}
+
 /* ========================== */
 /*   ESTILO DO FORMULÁRIO     */
 /* ========================== */

@@ -116,7 +116,7 @@ body{
 /* ========================== */
 
 .dashboard {
-    margin-top: 6rem;
+    margin-top: 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -569,6 +569,13 @@ canvas {
     border: 1px solid rgb(103, 103, 103);
 }
 
+#modal-cadastro-aluno select {
+   border-radius: 12px;
+   padding-top: 5px;
+   padding-bottom: 5px;
+   padding-right: 10px;
+}
+
 /* ========================== */
 /*       ESTILO DOS BOTÕES    */
 /* ========================== */
@@ -588,6 +595,28 @@ canvas {
 
 .button-submit:hover {
     background: #145214;
+}
+
+.btn-excluir-aluno, .btn-excluir-turma, .btn-excluir-professor{
+    background-color: red;
+    color: white;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    font-size: 17px;
+    padding: 4px 7px;
+}
+
+.btn-excluir-aluno:hover{ 
+    cursor: pointer;
+}
+
+.btn-excluir-professor:hover{
+    cursor: pointer;
+}
+
+.btn-excluir-turma:hover{
+    cursor: pointer;
 }
 
 /* ========================== */

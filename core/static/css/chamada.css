@@ -92,10 +92,11 @@
 }
 
 #graficoPresenca {
-    width: 100% !important;
-    height: 100% !important;
-    max-height: 250px; /* Limita a altura do canvas do gráfico */
+    width: 300px !important;
+    height: 300px !important;
+    display: block;
 }
+
 
 
 /* Responsividade */

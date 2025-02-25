@@ -238,6 +238,17 @@ def atualizar_aluno(request):
             return JsonResponse({"status": "erro", "mensagem": "Método inválido."}) 
 
 
+@csrf_exempt
+def excluir_aluno(request, aluno_id):
+    try:
+        aluno = get_object_or_404(Aluno, id=aluno_id)
+        aluno.delete()
+        return JsonResponse({"status": "sucesso", "mensagem": "Aluno excluído com sucesso!"})
+    except Exception as e:
+        return JsonResponse({"status": "erro", "mensagem": f"Erro ao excluir aluno: {str(e)}"}, status=500)
+
+
+
 #FUNCOES DE PROFESSORES
 @csrf_exempt
 def cadastrar_professor(request):
@@ -317,6 +328,18 @@ def atualizar_professor(request):
     return JsonResponse({"status": "erro", "mensagem": "Método inválido."})
 
 
+
+@csrf_exempt
+def excluir_professor(request, professor_id):
+    try:
+        professor = get_object_or_404(Professor, id=professor_id)
+        professor.delete()
+        return JsonResponse({"status": "sucesso", "mensagem": "Professor excluído com sucesso!"})
+    except Exception as e:
+        return JsonResponse({"status": "erro", "mensagem": f"Erro ao excluir professor: {str(e)}"}, status=500)
+
+
+
 #CODIGO PARA OBTER O TOTAL DE TURMA, PROFESSOR E ALUNOS
 def obter_totais(request):
     total_turmas = Turma.objects.count()
@@ -339,21 +362,19 @@ def atualizar_turma(request):
 
             turma_id = data.get("id")
             nome = data.get("nome")
-            faixa_etaria_de = data.get("faixa_etaria_de")  # Correção do nome da chave
-            faixa_etaria_ate = data.get("faixa_etaria_ate")  # Correção do nome da chave
-            professores_ids = data.get("professores", [])
+            faixa_etaria_de = data.get("faixa_etaria_de")  
+            faixa_etaria_ate = data.get("faixa_etaria_ate")  
+            professores_ids = data.get("professores", [])  
 
-            # Obtém a turma do banco de dados
             turma = get_object_or_404(Turma, id=turma_id)
             turma.nome = nome
             turma.faixa_etaria_de = faixa_etaria_de
             turma.faixa_etaria_ate = faixa_etaria_ate
             turma.save()
 
-            # Atualizar professores da turma
+            # Atualizar os professores da turma corretamente
             professores = Professor.objects.filter(id__in=professores_ids)
-            for professor in professores:
-                professor.turmas.add(turma)  # Adiciona a turma a cada professor selecionado
+            turma.professor_set.set(professores)  # Define os professores da turma
 
             return JsonResponse({"status": "sucesso", "mensagem": "Turma atualizada com sucesso!"})
 
@@ -362,18 +383,19 @@ def atualizar_turma(request):
 
     return JsonResponse({"status": "erro", "mensagem": "Método inválido."})
 
+
 def listar_turmas_completas(request):
-    turmas = Turma.objects.prefetch_related("professor_set").all()  # Garante que os professores são carregados
+    turmas = Turma.objects.prefetch_related("professor_set").all()  
     turmas_json = []
 
     for turma in turmas:
-        professores = turma.professor_set.all().values_list("nome", flat=True)  # Lista de nomes dos professores
+        professores = turma.professor_set.all().values_list("nome", flat=True)  
         turmas_json.append({
             "id": turma.id,
             "nome": turma.nome,
             "faixa_etaria_de": turma.faixa_etaria_de,
             "faixa_etaria_ate": turma.faixa_etaria_ate,
-            "professores": list(professores) if professores else ["Nenhum professor"]  # Lista de professores
+            "professores": list(professores)  # Certifique-se de que está retornando os professores corretamente
         })
 
     return JsonResponse({"turmas": turmas_json})
@@ -382,6 +404,17 @@ def listar_turmas_completas(request):
 def listar_turmas_pagina(request):
     turmas = Turma.objects.all()
     return render(request, 'turmasGeral.html', {'turmas': turmas})
+
+
+@csrf_exempt
+def excluir_turma(request, turma_id):
+    try:
+        turma = get_object_or_404(Turma, id=turma_id)
+        turma.delete()
+        return JsonResponse({"status": "sucesso", "mensagem": "Turma excluída com sucesso!"})
+    except Exception as e:
+        return JsonResponse({"status": "erro", "mensagem": f"Erro ao excluir turma: {str(e)}"}, status=500)
+
 
 
 
@@ -512,47 +545,46 @@ def listar_presenca(request):
     })
 
 
+import calendar
+
 @csrf_exempt
 def salvar_presenca(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
 
-            print("\n🔍 Dados recebidos pelo Django:", data)  # Log para debug
-
             turma_id = data.get("turma_id")
-            mes = data.get("mes")
-            ano = data.get("ano")
+            mes = int(data.get("mes"))
+            ano = int(data.get("ano"))
             domingo = data.get("domingo")
-            presencas = data.get("presencas")  # Lista de {aluno_id, presente}
 
-            # Verifica se todos os dados foram recebidos corretamente
-            if not all([turma_id, mes, ano, domingo, presencas]):
+            if not all([turma_id, mes, ano, domingo]):
                 return JsonResponse({"status": "erro", "mensagem": "Dados incompletos!"}, status=400)
 
-            # Converte a data do domingo selecionado
-            data_chamada = datetime(int(ano), int(mes), 1)  # Primeiro dia do mês
-            while data_chamada.weekday() != 6:  # Encontra o primeiro domingo do mês
-                data_chamada = data_chamada.replace(day=data_chamada.day + 1)
-            for _ in range(int(domingo) - 1):  # Avança para o domingo correto
-                data_chamada = data_chamada.replace(day=data_chamada.day + 7)
+            # Garantindo que domingo seja um número válido
+            try:
+                domingo = int(domingo)
+                data_chamada = date(ano, mes, domingo)
+            except ValueError:
+                return JsonResponse({"status": "erro", "mensagem": "Data inválida. Verifique o domingo selecionado."}, status=400)
 
-            turma = Turma.objects.get(id=turma_id)
+            turma = get_object_or_404(Turma, id=turma_id)
 
-            # Processa cada presença
+            presencas = data.get("presencas", [])
             for item in presencas:
-                aluno_id = item["aluno_id"]
-                presente = item["presente"]
+                aluno_id = item.get("aluno_id")
+                presente = item.get("presente")
 
-                aluno = Aluno.objects.get(id=aluno_id)
+                if aluno_id is None:
+                    return JsonResponse({"status": "erro", "mensagem": "Aluno inválido."}, status=400)
 
-                # Atualiza ou cria a presença no banco de dados
+                aluno = get_object_or_404(Aluno, id=aluno_id)
+
                 presenca, created = Presenca.objects.update_or_create(
                     aluno=aluno,
                     turma=turma,
-                    data=data_chamada,
-                    domingo=domingo,
-                    defaults={"presente": presente},
+                    data=data_chamada,  
+                    defaults={"presente": presente, "domingo": domingo}, 
                 )
 
             return JsonResponse({"status": "sucesso", "mensagem": "Presença registrada com sucesso!"})
@@ -561,3 +593,32 @@ def salvar_presenca(request):
             return JsonResponse({"status": "erro", "mensagem": f"Erro ao salvar presença: {str(e)}"}, status=500)
 
     return JsonResponse({"status": "erro", "mensagem": "Método inválido."}, status=400)
+
+
+#Aniversariantes
+def listar_aniversariantes(request):
+    mes = request.GET.get("mes")
+    
+    if not mes:
+        return JsonResponse({"status": "erro", "mensagem": "Mês não informado"}, status=400)
+
+    # Dicionário para converter nomes de meses em números
+    meses_dict = {
+        "janeiro": 1, "fevereiro": 2, "março": 3, "abril": 4, "maio": 5, "junho": 6,
+        "julho": 7, "agosto": 8, "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12
+    }
+
+    mes_numero = meses_dict.get(mes.lower())
+    if not mes_numero:
+        return JsonResponse({"status": "erro", "mensagem": "Mês inválido"}, status=400)
+
+    # Busca aniversariantes do mês selecionado
+    aniversariantes = Aluno.objects.filter(data_nascimento__month=mes_numero).values("nome", "data_nascimento")
+
+    # Formata a data para exibição no formato DD/MM
+    aniversariantes_formatados = [
+        {"nome": aluno["nome"], "data_nascimento": aluno["data_nascimento"].strftime("%d/%m")}
+        for aluno in aniversariantes
+    ]
+
+    return JsonResponse({"status": "sucesso", "aniversariantes": aniversariantes_formatados})
