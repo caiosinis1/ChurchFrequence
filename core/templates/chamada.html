@@ -10,7 +10,7 @@
     <script src="{% static 'js/script.js' %}" defer></script>
     <script src="{% static 'js/chamada.js' %}" defer></script> 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     
 </head>
@@ -19,7 +19,7 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="logo">
-            <img src="{% static 'img/logoIPB-fundoPNG.png' %}" alt="Logotipo da Igreja">
+            <img src="{% static '/img/logoIPBbranco.png' %}" alt="Logotipo da Igreja">
         </div>
         <button class="menu-toggle" id="menu-toggle">☰</button>
         <ul class="nav-links" id="nav-links">
@@ -87,7 +87,7 @@
             </select>
         
             <h3>Lista de Alunos</h3>
-            <div id="lista-alunos-chamada">
+            <div id="lista-alunos-chamada"  class="lista-alunos-chamada">
                 <p>Selecione a turma, o mês, o ano e o domingo para carregar a chamada.</p>
             </div>
         
@@ -100,6 +100,106 @@
             <canvas id="graficoPresenca"></canvas>
         </div>
 </main>
+
+ <!-- Modal de Cadastro de Turma -->
+ <div id="modal-cadastro-turma" class="modal-cadastro">
+    <div id="modal-cadastro-content-aluno" class="modal-cadastro-content">
+        <div class="modal-cadastro-header">
+            <h2>Cadastrar Nova Turma</h2>
+            <span class="modal-cadastro-close" id="fechar-modal-cadastro-turma">&times;</span>
+        </div>
+        <form id="form-cadastro-turma" method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group-nome-turma">
+                    <label for="nome-turma">Nome da Turma:</label>
+                    <input type="text" id="nome-turma" name="nome-turma" required>
+                </div>
+                <div class="form-group faixa-etaria">
+                    <label for="faixa-etaria-de">Faixa Etária:</label>
+                    <div class="inputs-faixa-etaria-container">
+                        <input type="number" id="faixa-etaria-de" name="faixa-etaria-de" placeholder="De" required>
+                        <input type="number" id="faixa-etaria-ate" name="faixa-etaria-ate" placeholder="Até" required>
+                    </div>
+                </div>
+            </div>
+            <h3>Professores Responsáveis:</h3>
+            <div class="modal-cadastro-opcoes" id="lista-professores">
+                <label><input type="checkbox" name="professor" value="Professor 1"> Professor 1</label>
+                <label><input type="checkbox" name="professor" value="Professor 2"> Professor 2</label>
+                <label><input type="checkbox" name="professor" value="Professor 3"> Professor 3</label>
+            </div>
+            <button class="button-submit" type="submit">Cadastrar</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Cadastro de Professor -->
+<div id="modal-cadastro-professor" class="modal-cadastro">
+<div id="modal-cadastro-content-professor" class="modal-cadastro-content">
+    <div class="modal-cadastro-header">
+        <h2>Cadastrar Novo Professor</h2>
+        <span class="modal-cadastro-close" id="fechar-modal-cadastro-professor">&times;</span>
+    </div>
+    <form id="form-cadastro-professor" method="post">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group-nome-completo">
+                <label for="nome-professor">Nome Completo:</label>
+                <input type="text" id="nome-professor" name="nome-professor" required>
+            </div>
+            <div class="form-group-nascimento">
+                <label for="data-nascimento-professor">Data de Nascimento:</label>
+                <input type="date" id="data-nascimento-professor" name="data-nascimento-professor" required>
+            </div>
+        </div>
+        <h3>Turmas:</h3>
+        <div class="modal-cadastro-opcoes" id="turmas-professor">
+            {% for turma in turmas %}
+                <label><input type="checkbox" name="turma-professor" value="{{ turma.id }}"> {{ turma.nome }}</label>
+            {% empty %}
+                <p>Nenhuma turma cadastrada</p>
+            {% endfor %}
+        </div>
+        <button class="button-submit" type="submit">Cadastrar</button>
+    </form>
+</div>
+</div>
+
+<!-- Modal de Cadastro de Aluno -->
+<div id="modal-cadastro-aluno" class="modal-cadastro">
+    <div class="modal-cadastro-content">
+        <div class="modal-cadastro-header">
+            <h2>Cadastrar Novo Aluno</h2>
+            <span class="modal-cadastro-close" id="fechar-modal-cadastro-aluno">&times;</span>
+        </div>
+        <form id="form-cadastro-aluno" method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group-nome-completo">
+                    <label for="nome-aluno">Nome Completo:</label>
+                    <input type="text" id="nome-aluno" name="nome" required>
+                </div>
+                <div class="form-group-nascimento">
+                    <label for="data-nascimento-aluno">Data de Nascimento:</label>
+                    <input type="date" id="data-nascimento-aluno" name="data-nascimento-aluno" required>
+                </div>
+            </div>
+        
+            <h3>Turma:</h3>
+            <select id="turma" name="turma" required>
+                <option value="">-- Escolha uma turma --</option>
+                {% for turma in turmas %}
+                    <option value="{{ turma.id }}">{{ turma.nome }}</option>
+                {% empty %}
+                    <option value="" disabled>Nenhuma turma cadastrada</option>
+                {% endfor %}
+            </select>
+
+            <button class="button-submit" type="submit">Cadastrar</button>
+        </form>
+    </div>
+</div>
 
 </body>
 </html>

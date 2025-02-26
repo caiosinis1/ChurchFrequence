@@ -34,7 +34,7 @@
 .alunos-tabela th, .alunos-tabela td {
     padding: 10px;
     border-bottom: 1px solid #ccc;
-    text-align: center;
+    text-align: left;
     color: black;
 }
 
@@ -43,7 +43,7 @@
     color: black;
 }
 
-tbody td{
+.alunos-tabela td{
     font-size: 12px;
 }
 
@@ -118,27 +118,84 @@ border-radius: 6px;}
     border-radius: 5px;
 }
 
-.alunos-sugestoes {
+/* Estilo da lista de sugestões */
+#aluno-sugestoes {
     position: absolute;
-    width: 100%;
+    top: 100%; /* Garante que a lista apareça logo abaixo do input */
+    left: 0;
     background: white;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-top: none;
+    width: 100%; /* Para alinhar com o input */
+    max-height: 200px; /* Define uma altura máxima */
+    overflow-y: auto; /* Adiciona scroll quando necessário */
+    z-index: 1000; /* Garante que fique acima de outros elementos */
     list-style: none;
     padding: 0;
-    margin-top: 5px;
-    display: none;
-    max-height: 150px;
-    overflow-y: auto;
+    margin-top: 2px; /* Pequeno espaçamento para não colar no input */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.alunos-sugestoes li {
-    padding: 0.5rem;
+/* Estilizando os itens da lista */
+#aluno-sugestoes li {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+/* Alteração ao passar o mouse */
+#aluno-sugestoes li:hover {
+    background: #f0f0f0;
+}
+
+/* Ajusta a posição da lista de sugestões dentro do container correto */
+.alunos-form-group {
+    position: relative; /* Garante que os elementos filhos fiquem posicionados corretamente */
+}
+
+
+#filtro-turma {
+    padding: 3.5px 12px;
+    border-radius: 5px;
+    background-color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    margin-bottom: 0.4rem;
+    margin-left: 0.2rem;
+}
+
+.paginacao{
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.paginacao button{
+    padding: 4px 12px;
+    border-radius: 14px;
+    border: 1px solid gray;
+}
+
+.paginacao button:hover{
     cursor: pointer;
 }
 
-.alunos-sugestoes li:hover {
-    background: #f0f0f0;
+.paginacao span{
+    font-size: 14px;
+    font-family: Poppins;
+    font-weight: 600;
+}
+
+#prev-page{
+    margin-right: 1rem;
+}
+
+#next-page{
+    margin-left: 1rem;
 }
 
 /* ========================== */
@@ -188,7 +245,12 @@ border-radius: 6px;}
     .alunos-tabela th, .alunos-tabela td,
     .professores-tabela th, .professores-tabela td {
         font-size: 0.6rem;
-        padding: 5px;
+        padding: 4px;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) { 
+        display: none;
     }
 
     .alunos-listagem, .professores-listagem {

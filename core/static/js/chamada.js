@@ -65,49 +65,51 @@ document.addEventListener("DOMContentLoaded", function () {
     
 
     // Atualizar gráfico de presença
-function atualizarGrafico(presentes, ausentes) {
-    console.log("🔹 Atualizando gráfico: Presentes:", presentes, "Ausentes:", ausentes);
-
-    const canvas = document.getElementById("graficoPresenca");
-    if (!canvas) {
-        console.error("❌ Canvas do gráfico não encontrado!");
-        return;
-    }
-
-    const ctx = canvas.getContext("2d");
-    console.log("📌 Contexto do Canvas:", ctx);
-
-    if (!ctx) {
-        console.error("❌ Erro ao obter o contexto do gráfico.");
-        return;
-    }
-
-    // Destroi o gráfico anterior, se existir
-    if (window.graficoPresenca) {
-        window.graficoPresenca.destroy();
-    }
-
-    // Criar novo gráfico
-    window.graficoPresenca = new Chart(ctx, {
-        type: "doughnut",
-        data: {
-            labels: ["Presentes", "Faltantes"],
-            datasets: [{
-                data: [presentes, ausentes],
-                backgroundColor: ["#4CAF50", "#FF4C4C"],
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: "bottom" }
-            }
+    function atualizarGrafico(presentes, ausentes) {
+        console.log("🔹 Atualizando gráfico: Presentes:", presentes, "Ausentes:", ausentes);
+    
+        const canvas = document.getElementById("graficoPresenca");
+        const graficoContainer = document.querySelector(".grafico-card");
+    
+        if (!canvas) {
+            console.error("❌ Canvas do gráfico não encontrado!");
+            return;
         }
-    });
-
-    console.log("✅ Gráfico atualizado com sucesso!");
-}
+    
+        // Garante que o gráfico está visível
+        graficoContainer.style.display = "flex";
+        canvas.style.display = "block";
+        canvas.style.opacity = "1";
+    
+        const ctx = canvas.getContext("2d");
+    
+        // Remove gráfico anterior, se existir
+        if (window.graficoPresenca && typeof window.graficoPresenca.destroy === "function") {
+            console.log("🗑️ Removendo gráfico antigo...");
+            window.graficoPresenca.destroy();
+        }
+    
+        console.log("📊 Criando novo gráfico...");
+        window.graficoPresenca = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: ["Presentes", "Faltantes"],
+                datasets: [{
+                    data: [presentes, ausentes],
+                    backgroundColor: ["#4CAF50", "#FF4C4C"],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+    
+        console.log("✅ Gráfico atualizado com sucesso!");
+    }
 
     
     function carregarAlunos() {

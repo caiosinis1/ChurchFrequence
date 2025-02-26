@@ -20,6 +20,16 @@ from core.models import Turma
 import uuid
 from .models import Aluno, Presenca
 from datetime import datetime, date
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import render
+from .models import Presenca, Turma, Aluno
+import csv
+from io import StringIO
+from reportlab.pdfgen import canvas # type: ignore
+from datetime import datetime
+from django.db.models import Count, Q
+import calendar 
+from datetime import date, timedelta
 
 
 
@@ -181,12 +191,22 @@ def cadastrar_aluno(request):
     })
 
 
-def listar_alunos(request):
-    alunos = Aluno.objects.all()
-    alunos_data = []
+from django.core.paginator import Paginator
 
-    for aluno in alunos:
-        # Formata a data de nascimento para exibir apenas dia e mês
+def listar_alunos(request):
+    turma_id = request.GET.get("turma_id")
+    pagina = request.GET.get("pagina", 1)  # Obtém o número da página, padrão = 1
+    itens_por_pagina = 7  # Define o número máximo de alunos por página
+
+    alunos = Aluno.objects.all()
+    if turma_id:
+        alunos = alunos.filter(turma_id=turma_id)
+
+    paginator = Paginator(alunos, itens_por_pagina)
+    pagina_atual = paginator.get_page(pagina)  # Obtém a página específica
+
+    alunos_data = []
+    for aluno in pagina_atual:
         aniversario = aluno.data_nascimento.strftime("%d/%m") if aluno.data_nascimento else "N/A"
 
         alunos_data.append({
@@ -197,7 +217,13 @@ def listar_alunos(request):
             "matricula": aluno.matricula,
         })
 
-    return JsonResponse({"alunos": alunos_data})
+    return JsonResponse({
+        "alunos": alunos_data,
+        "pagina_atual": pagina_atual.number,
+        "total_paginas": paginator.num_pages
+    })
+
+
 
 
 def detalhar_aluno(request, aluno_id):
@@ -602,13 +628,15 @@ def listar_aniversariantes(request):
     if not mes:
         return JsonResponse({"status": "erro", "mensagem": "Mês não informado"}, status=400)
 
-    # Dicionário para converter nomes de meses em números
+    # Dicionário para converter nomes de meses em números (aceitando "marco" e "março")
     meses_dict = {
-        "janeiro": 1, "fevereiro": 2, "março": 3, "abril": 4, "maio": 5, "junho": 6,
+        "janeiro": 1, "fevereiro": 2, "marco": 3, "março": 3, "abril": 4, "maio": 5, "junho": 6,
         "julho": 7, "agosto": 8, "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12
     }
 
-    mes_numero = meses_dict.get(mes.lower())
+    mes_formatado = mes.lower()
+    mes_numero = meses_dict.get(mes_formatado)
+
     if not mes_numero:
         return JsonResponse({"status": "erro", "mensagem": "Mês inválido"}, status=400)
 
@@ -622,3 +650,143 @@ def listar_aniversariantes(request):
     ]
 
     return JsonResponse({"status": "sucesso", "aniversariantes": aniversariantes_formatados})
+
+#CODIGO DO GRAFICO PRINCIPAL
+def obter_presenca_mensal(request):
+    mes = request.GET.get("mes")
+    ano = request.GET.get("ano")
+
+    if not mes or not ano:
+        return JsonResponse({"status": "erro", "mensagem": "Mês e ano são obrigatórios."}, status=400)
+
+    try:
+        mes = int(mes)
+        ano = int(ano)
+    except ValueError:
+        return JsonResponse({"status": "erro", "mensagem": "Mês e ano inválidos."}, status=400)
+
+    # Obtém a quantidade correta de dias no mês
+    _, num_dias = calendar.monthrange(ano, mes)
+
+    # Obtém todos os domingos dentro do mês
+    domingos = [
+        date(ano, mes, dia)
+        for dia in range(1, num_dias + 1)
+        if date(ano, mes, dia).weekday() == 6  # 6 representa domingo
+    ]
+
+    presenca_por_domingo = []
+
+    for index, domingo in enumerate(domingos, start=1):
+        total_presentes = Presenca.objects.filter(data=domingo, presente=True).count()
+        presenca_por_domingo.append({"domingo": f"Domingo {index}", "presentes": total_presentes})
+
+    return JsonResponse({"status": "sucesso", "presencas": presenca_por_domingo})
+
+
+
+#CODIGOS DOS RELATORIOS
+
+def relatorios(request):
+    ano_atual = datetime.today().year
+    anos_disponiveis = [ano_atual - i for i in range(5)]  # Últimos 5 anos
+    turmas = Turma.objects.all()
+    return render(request, "relatorios.html", {"turmas": turmas, "anos_disponiveis": anos_disponiveis})
+
+import calendar
+from datetime import date, timedelta
+
+def gerar_relatorio(request):
+    turma_id = request.GET.get("turma")
+    periodo = request.GET.get("periodo")
+    mes = request.GET.get("mes")
+    ano = request.GET.get("ano")
+    semana = request.GET.get("semana")
+
+    if not mes or not ano:
+        return JsonResponse({"status": "erro", "mensagem": "Mês e ano são obrigatórios."}, status=400)
+
+    mes = int(mes)
+    ano = int(ano)
+
+    filtros = {"data__month": mes, "data__year": ano}
+    if turma_id:
+        filtros["turma_id"] = turma_id
+
+    if periodo == "semanal":
+        if not semana:
+            return JsonResponse({"status": "erro", "mensagem": "Semana não informada."}, status=400)
+
+        semana = int(semana)
+
+        # Obtém todos os domingos do mês
+        _, num_dias = calendar.monthrange(ano, mes)
+        domingos = [date(ano, mes, dia) for dia in range(1, num_dias + 1) if date(ano, mes, dia).weekday() == 6]
+
+        # Verifica se a semana escolhida tem um domingo correspondente
+        if semana > len(domingos) or semana < 1:
+            return JsonResponse({"status": "erro", "mensagem": "Semana inválida para o mês selecionado."}, status=400)
+
+        data_especifica = domingos[semana - 1]
+        filtros["data"] = data_especifica
+
+        registros = Presenca.objects.filter(**filtros).values("data", "turma__nome").annotate(
+            presentes=Count("id", filter=Q(presente=True)),
+            faltantes=Count("id", filter=Q(presente=False))
+        )
+
+    else:  # Relatório mensal
+        registros = Presenca.objects.filter(**filtros).values("data", "turma__nome").annotate(
+            presentes=Count("id", filter=Q(presente=True)),
+            faltantes=Count("id", filter=Q(presente=False))
+        )
+
+    return JsonResponse({"status": "sucesso", "dados": list(registros)})
+
+
+
+
+def exportar_csv(request):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="relatorio_presenca.csv"'
+    writer = csv.writer(response)
+    
+    writer.writerow(["Data", "Turma", "Presentes", "Faltantes"])
+    for item in gerar_relatorio(request).json().get("dados", []):
+        writer.writerow([item["data"], item["turma__nome"], item["presentes"], item["faltantes"]])
+    
+    return response
+
+def exportar_pdf(request):
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Disposition"] = 'attachment; filename="relatorio_presenca.pdf"'
+    p = canvas.Canvas(response)
+
+    # Obtém os dados corretamente sem chamar `.json()`
+    relatorio_response = gerar_relatorio(request)
+    relatorio_data = json.loads(relatorio_response.content)  # Decodifica o JSON
+
+    print("DEBUG - Resposta do relatório:", relatorio_data)  # Debug para verificar a resposta
+
+    if relatorio_data.get("status") != "sucesso":
+        p.drawString(100, 800, "Erro ao gerar relatório")
+    else:
+        y = 800
+        p.drawString(100, y, "Relatório de Presença")
+        y -= 20
+        for item in relatorio_data.get("dados", []):
+            p.drawString(100, y, f"{item['data']} - {item['turma_nome']} - Presentes: {item['presentes']} - Faltantes: {item['faltantes']}")
+            y -= 20
+
+    p.showPage()
+    p.save()
+    return response
+
+
+from django.shortcuts import redirect
+
+def exportar_relatorio(request):
+    formato = request.GET.get('formato', 'pdf')
+    if formato == 'csv':
+        return redirect('exportar_csv')
+    return redirect('exportar_pdf')

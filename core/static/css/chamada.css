@@ -71,11 +71,7 @@
     margin-bottom: 10px;
 }
 
-/* Ajuste do Canvas para evitar aumento infinito */
-.chamada-grafico canvas {
-    width: 250px !important;
-    height: 250px !important;
-}
+
 
 .grafico-card {
     width: 100%;
@@ -91,9 +87,18 @@
     border-radius: 8px;
 }
 
+.chamada-card p{
+    padding-left: 8%;
+    padding-right: 2%;
+}
+
+.lista-alunos-chamada {
+    text-align: left;
+}
+
 #graficoPresenca {
     width: 300px !important;
-    height: 300px !important;
+    height: 460px !important;
     display: block;
 }
 
@@ -104,5 +109,37 @@
     .chamada-container {
         flex-direction: column;
         align-items: center;
+    }
+
+    .grafico-card h2{
+        font-size: 17px;
+    }
+
+    .chamada-card h2 {
+        font-size: 17px;
+        margin-bottom: 15px;
+    }
+
+    .chamada-card h3{
+        font-size: 17px;
+    }
+
+    .chamada-card p{
+        font-size: 16px;
+        padding-left: 8%;
+        padding-right: 2%;
+    }
+
+    .chamada-card label{
+        font-size: 15px;
+    }
+
+    .chamada-card select{
+        padding-bottom: 5px;
+        padding-top: 5px;
+    }
+
+    .lista-alunos-chamada {
+        text-align: left;
     }
 }
