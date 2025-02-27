@@ -3,72 +3,101 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const inputPesquisa = document.getElementById("aluno-pesquisa");
     const sugestoesLista = document.getElementById("aluno-sugestoes");
+    const filtroTurma = document.getElementById("filtro-turma");
+    const prevPageBtn = document.getElementById("prev-page");
+    const nextPageBtn = document.getElementById("next-page");
+    const pageInfo = document.getElementById("page-info");
+    let paginaAtual = 1;  // Página inicial
 
-    // Função para carregar a lista de alunos na tabela
-    function carregarAlunos() {
-        fetch("/listar_alunos/")
+    function carregarTurmas() {
+        fetch("/listar_turmas/")
             .then(response => response.json())
             .then(data => {
-                console.log("📌 Alunos recebidos:", data);
+                console.log("📌 Turmas recebidas:", data);
+    
+                // Atualiza o filtro de turmas
+                let filtroTurma = document.getElementById("filtro-turma");
+                filtroTurma.innerHTML = '<option value="">Exibir Todos</option>';
+    
+                // Atualiza o select de turmas no formulário de edição
+                let selectTurma = document.getElementById("alunos-turma");
+                selectTurma.innerHTML = '<option value="">Selecione uma turma</option>';
+    
+                data.turmas.forEach(turma => {
+                    let optionFiltro = document.createElement("option");
+                    optionFiltro.value = turma.id;
+                    optionFiltro.textContent = turma.nome;
+                    filtroTurma.appendChild(optionFiltro);
+    
+                    let optionForm = document.createElement("option");
+                    optionForm.value = turma.id;
+                    optionForm.textContent = turma.nome;
+                    selectTurma.appendChild(optionForm);
+                });
+            })
+            .catch(error => console.error("❌ Erro ao buscar turmas:", error));
+    }
 
+    function carregarAlunos(turmaId = "", pagina = 1) {
+        let url = `/listar_alunos/?pagina=${pagina}`;
+        if (turmaId) {
+            url += `&turma_id=${turmaId}`;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
                 let tabelaBody = document.getElementById("alunos-tabela-body");
-
-                if (!tabelaBody) {
-                    console.error("❌ Elemento #alunos-tabela-body não encontrado");
-                    return;
-                }
-
-                // Limpa a tabela antes de inserir novos dados
                 tabelaBody.innerHTML = "";
 
-                // Popula a tabela com os alunos do banco de dados
                 data.alunos.forEach(aluno => {
-                    let aniversario = aluno.aniversario && aluno.aniversario !== "N/A" ? aluno.aniversario : "N/A";
-
+                    let aniversario = aluno.aniversario !== "N/A" ? aluno.aniversario : "N/A";
                     let row = document.createElement("tr");
                     row.innerHTML = `
                         <td>${aluno.nome}</td>
                         <td>${aluno.turma}</td>
                         <td>${aniversario}</td>
                         <td>${aluno.matricula}</td>
+                        <td>
+                            <button class="btn-excluir-aluno" data-aluno-id="${aluno.id}"> 🗑️ </button>
+                        </td>
                     `;
                     tabelaBody.appendChild(row);
                 });
+
+                // Atualiza a paginação
+                paginaAtual = data.pagina_atual;
+                pageInfo.textContent = `Página ${paginaAtual} de ${data.total_paginas}`;
+
+                prevPageBtn.disabled = paginaAtual === 1;
+                nextPageBtn.disabled = paginaAtual === data.total_paginas;
             })
             .catch(error => console.error("❌ Erro ao buscar alunos:", error));
     }
 
-    // Função para formatar a data para exibição na tabela (dd/mm)
-    function formatarDataParaTabela(data) {
-        let dataObj = new Date(data);
-        let dia = dataObj.getUTCDate().toString().padStart(2, "0");
-        let mes = (dataObj.getUTCMonth() + 1).toString().padStart(2, "0");
-        return `${dia}/${mes}`;
-    }
+    // Atualiza a lista quando uma nova turma for selecionada
+    filtroTurma.addEventListener("change", function () {
+        paginaAtual = 1;
+        carregarAlunos(this.value, paginaAtual);
+    });
 
-    // Função para carregar a lista de turmas no select
-    function carregarTurmas() {
-        fetch("/listar_turmas/")
-            .then(response => response.json())
-            .then(data => {
-                console.log("📌 Turmas recebidas:", data);
+    // Botão Anterior
+    prevPageBtn.addEventListener("click", function () {
+        if (paginaAtual > 1) {
+            carregarAlunos(filtroTurma.value, --paginaAtual);
+        }
+    });
 
-                let selectTurma = document.getElementById("alunos-turma");
-                selectTurma.innerHTML = '<option value="">Selecione uma turma</option>';
+    // Botão Próximo
+    nextPageBtn.addEventListener("click", function () {
+        carregarAlunos(filtroTurma.value, ++paginaAtual);
+    });
+    
 
-                data.turmas.forEach(turma => {
-                    let option = document.createElement("option");
-                    option.value = turma.id;
-                    option.textContent = turma.nome;
-                    selectTurma.appendChild(option);
-                });
-            })
-            .catch(error => console.error("❌ Erro ao buscar turmas:", error));
-    }
 
     // Buscar alunos ao digitar na pesquisa
     inputPesquisa.addEventListener("input", function () {
-        const termo = this.value.trim();
+        const termo = this.value.trim().toLowerCase();
         sugestoesLista.innerHTML = "";
 
         if (termo.length > 0) {
@@ -76,9 +105,25 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(response => response.json())
                 .then(data => {
                     sugestoesLista.innerHTML = "";
+
                     if (data.alunos.length > 0) {
                         sugestoesLista.style.display = "block";
-                        data.alunos.forEach(aluno => {
+
+                        // Ordenar: primeiro os nomes que **começam** com o termo, depois os que **contêm** o termo em outras posições
+                        let alunosOrdenados = data.alunos.sort((a, b) => {
+                            let nomeA = a.nome.toLowerCase();
+                            let nomeB = b.nome.toLowerCase();
+
+                            let comecaComA = nomeA.startsWith(termo) ? 0 : 1;
+                            let comecaComB = nomeB.startsWith(termo) ? 0 : 1;
+
+                            if (comecaComA !== comecaComB) {
+                                return comecaComA - comecaComB; // Prioriza os que começam com o termo
+                            }
+                            return nomeA.localeCompare(nomeB); // Mantém a ordem alfabética dentro de cada grupo
+                        });
+
+                        alunosOrdenados.forEach(aluno => {
                             const item = document.createElement("li");
                             item.textContent = aluno.nome;
                             item.addEventListener("click", function () {
@@ -159,7 +204,49 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("❌ Erro ao atualizar aluno:", error));
     });
-    
+
+    // Função para excluir aluno
+    function excluirAluno(alunoId) {
+        Swal.fire({
+            title: "Tem certeza?",
+            text: "Essa ação não pode ser desfeita!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sim, excluir!",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/excluir_aluno/${alunoId}/`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "sucesso") {
+                        Swal.fire("Excluído!", data.mensagem, "success");
+                        carregarAlunos();
+                    } else {
+                        Swal.fire("Erro!", data.mensagem, "error");
+                    }
+                })
+                .catch(error => console.error("❌ Erro ao excluir aluno:", error));
+            }
+        });
+    }
+
+    // Evento para capturar clique no botão de exclusão
+    document.addEventListener("click", function (event) {
+        console.log('ola')
+        if (event.target.classList.contains("btn-excluir-aluno")) {
+            let alunoId = event.target.dataset.alunoId;
+            excluirAluno(alunoId);
+        }
+    });
 
     // Ocultar sugestões ao clicar fora
     document.addEventListener("click", function (e) {

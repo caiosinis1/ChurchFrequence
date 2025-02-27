@@ -1,0 +1,224 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatorios</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/relatorios.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/script.js' %}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="shortcut icon" href="/core/static/img/logoIPB-fundoPNG.png    " type="image/x-icon">
+    <script src="{% static 'js/relatorios.js' %}" defer></script>
+
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="{% static '/img/logoIPBbranco.png' %}" alt="Logotipo da Igreja">
+        </div>
+        <button class="menu-toggle" id="menu-toggle">☰</button>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li class="dropdown">
+                <a href="#" id="turmas-btn">Turmas ▼</a>
+                <ul class="dropdown-menu" id="turmas-dropdown">
+                    <li><a href="#" id="abrir-modal-cadastro-turma">Cadastrar</a></li>
+                    <li><a href="{% url 'turmas_geral' %}">Geral</a></li>
+                    <li><a href="{% url 'chamada' %}">Chamada</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" id="alunos-btn">Alunos ▼</a>
+                <ul class="dropdown-menu" id="alunos-dropdown">
+                    <li><a href="#" id="abrir-modal-cadastro-aluno">Cadastrar</a></li>
+                    <li><a href="{% url 'alunos_geral' %}">Geral</a></li>
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" id="professores-btn">Professores ▼</a>
+                <ul class="dropdown-menu" id="professores-dropdown">
+                    <li><a href="#" id="abrir-modal-cadastro-professor">Cadastrar</a></li>
+                    <li><a href="{% url 'professores_geral' %}">Geral</a></li>
+                </ul>
+            </li>
+            <li><a href="{% url 'relatorios' %}">Relatorios</a></li>
+        </ul>
+    </nav>
+
+   
+    <main>
+        <div class="relatorios-container" id="relatorios-container">
+            <h2>Gerar Relatório de Presença</h2>
+            <div class="filtro-relatorios">
+                <select id="turma-select">
+                    <option value="">Todas as Turmas</option>
+                    {% for turma in turmas %}
+                        <option value="{{ turma.id }}">{{ turma.nome }}</option>
+                    {% empty %}
+                        <option value="" disabled>Nenhuma turma cadastrada</option>
+                    {% endfor %}
+                </select>
+                
+                <select id="periodo-select">
+                    <option value="semanal">Semanal</option>
+                    <option value="mensal" selected>Mensal</option>
+                </select>
+                <select id="mes-select">
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                </select>
+                <select id="ano-select">
+                    {% for ano in anos_disponiveis %}
+                        <option value="{{ ano }}">{{ ano }}</option>
+                    {% endfor %}
+                </select>
+                
+                <div id="semanas-container" style="display: none;">
+                    <p>Escolha a Semana:</p>
+                    <label><input type="radio" name="semana" value="1"> 1ª Semana</label>
+                    <label><input type="radio" name="semana" value="2"> 2ª Semana</label>
+                    <label><input type="radio" name="semana" value="3"> 3ª Semana</label>
+                    <label><input type="radio" name="semana" value="4"> 4ª Semana</label>
+                    <label><input type="radio" name="semana" value="5"> 5ª Semana</label>
+                </div>
+                
+            </div>
+            
+            <div class="resultado-relatorios">
+                <table class="tabela-relatorio">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Turma</th>
+                            <th>Presentes</th>
+                            <th>Faltantes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-relatorio-body">
+                        <tr><td colspan="4">Nenhum dado disponível</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="exportar-btns">
+                <button id="gerar-relatorio">Gerar Relatório</button>
+                <button class="btn-pdf" id="exportar-pdf">Exportar PDF</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Cadastro de Aluno -->
+    <div id="modal-cadastro-aluno" class="modal-cadastro">
+        <div class="modal-cadastro-content">
+            <div class="modal-cadastro-header">
+                <h2>Cadastrar Novo Aluno</h2>
+                <span class="modal-cadastro-close" id="fechar-modal-cadastro-aluno">&times;</span>
+            </div>
+            <form id="form-cadastro-aluno" method="post">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group-nome-completo">
+                        <label for="nome-aluno">Nome Completo:</label>
+                        <input type="text" id="nome-aluno" name="nome" required>
+                    </div>
+                    <div class="form-group-nascimento">
+                        <label for="data-nascimento-aluno">Data de Nascimento:</label>
+                        <input type="date" id="data-nascimento-aluno" name="data-nascimento-aluno" required>
+                    </div>
+                </div>
+            
+                <h3>Turma:</h3>
+                <select id="turma" name="turma" required>
+                    <option value="">-- Escolha uma turma --</option>
+                    {% for turma in turmas %}
+                        <option value="{{ turma.id }}">{{ turma.nome }}</option>
+                    {% empty %}
+                        <option value="" disabled>Nenhuma turma cadastrada</option>
+                    {% endfor %}
+                </select>
+
+                <button class="button-submit" type="submit">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+
+     <!-- Modal de Cadastro de Turma -->
+     <div id="modal-cadastro-turma" class="modal-cadastro">
+        <div id="modal-cadastro-content-aluno" class="modal-cadastro-content">
+            <div class="modal-cadastro-header">
+                <h2>Cadastrar Nova Turma</h2>
+                <span class="modal-cadastro-close" id="fechar-modal-cadastro-turma">&times;</span>
+            </div>
+            <form id="form-cadastro-turma" method="post">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group-nome-turma">
+                        <label for="nome-turma">Nome da Turma:</label>
+                        <input type="text" id="nome-turma" name="nome-turma" required>
+                    </div>
+                    <div class="form-group faixa-etaria">
+                        <label for="faixa-etaria-de">Faixa Etária:</label>
+                        <div class="inputs-faixa-etaria-container">
+                            <input type="number" id="faixa-etaria-de" name="faixa-etaria-de" placeholder="De" required>
+                            <input type="number" id="faixa-etaria-ate" name="faixa-etaria-ate" placeholder="Até" required>
+                        </div>
+                    </div>
+                </div>
+                <h3>Professores Responsáveis:</h3>
+                <div class="modal-cadastro-opcoes" id="lista-professores">
+                    <label><input type="checkbox" name="professor" value="Professor 1"> Professor 1</label>
+                    <label><input type="checkbox" name="professor" value="Professor 2"> Professor 2</label>
+                    <label><input type="checkbox" name="professor" value="Professor 3"> Professor 3</label>
+                </div>
+                <button class="button-submit" type="submit">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+
+   <!-- Modal de Cadastro de Professor -->
+   <div id="modal-cadastro-professor" class="modal-cadastro">
+        <div id="modal-cadastro-content-professor" class="modal-cadastro-content">
+            <div class="modal-cadastro-header">
+                <h2>Cadastrar Novo Professor</h2>
+                <span class="modal-cadastro-close" id="fechar-modal-cadastro-professor">&times;</span>
+            </div>
+            <form id="form-cadastro-professor" method="post">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group-nome-completo">
+                        <label for="nome-professor">Nome Completo:</label>
+                        <input type="text" id="nome-professor" name="nome-professor" required>
+                    </div>
+                    <div class="form-group-nascimento">
+                        <label for="data-nascimento-professor">Data de Nascimento:</label>
+                        <input type="date" id="data-nascimento-professor" name="data-nascimento-professor" required>
+                    </div>
+                </div>
+                <h3>Turmas:</h3>
+                <div class="modal-cadastro-opcoes" id="turmas-professor">
+                    {% for turma in turmas %}
+                        <label><input type="checkbox" name="turma-professor" value="{{ turma.id }}"> {{ turma.nome }}</label>
+                    {% empty %}
+                        <p>Nenhuma turma cadastrada</p>
+                    {% endfor %}
+                </div>
+                <button class="button-submit" type="submit">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+
+    </body>
+    </html>

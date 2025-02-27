@@ -20,6 +20,11 @@
 .chamada-card h2 {
     font-size: 20px;
     margin-bottom: 15px;
+    padding: 0;
+}
+
+.chamada-card p {
+    text-align: center;
 }
 
 .chamada-card select, .chamada-card button {
@@ -41,6 +46,15 @@
     background-color: #163b24;
 }
 
+#btn-excluir-chamada{
+    background-color: rgb(189, 21, 21);
+}
+
+#btn-excluir-chamada:hover{
+    background-color: rgb(131, 24, 24);
+    cursor: pointer;
+}
+
 /* Lista de Alunos */
 .lista-alunos {
     text-align: left;
@@ -58,7 +72,7 @@
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 350px;
+    width: 360px;
     max-width: 100%;
     display: flex;
     flex-direction: column;
@@ -71,11 +85,7 @@
     margin-bottom: 10px;
 }
 
-/* Ajuste do Canvas para evitar aumento infinito */
-.chamada-grafico canvas {
-    width: 250px !important;
-    height: 250px !important;
-}
+
 
 .grafico-card {
     width: 100%;
@@ -91,11 +101,16 @@
     border-radius: 8px;
 }
 
-#graficoPresenca {
-    width: 100% !important;
-    height: 100% !important;
-    max-height: 250px; /* Limita a altura do canvas do gráfico */
+.lista-alunos-chamada {
+    text-align: left;
 }
+
+#graficoPresenca {
+    width: 300px !important;
+    height: 460px !important;
+    display: block;
+}
+
 
 
 /* Responsividade */
@@ -103,5 +118,40 @@
     .chamada-container {
         flex-direction: column;
         align-items: center;
+    }
+
+    .grafico-card h2{
+        font-size: 17px;
+    }
+
+    .chamada-card h2 {
+        font-size: 17px;
+        margin-bottom: 15px;
+    }
+
+    .chamada-card h3{
+        font-size: 17px;
+    }
+
+    .chamada-card p{
+        font-size: 16px;
+        padding-left: 8%;
+        padding-right: 2%;
+    }
+
+    .chamada-card label{
+        font-size: 15px;
+    }
+
+    .chamada-card select{
+        padding-bottom: 5px;
+        padding-top: 5px;
+    }
+
+    .lista-alunos-chamada {
+        text-align: left;
+    }
+    .chamada-grafico{
+        width: 360px;
     }
 }

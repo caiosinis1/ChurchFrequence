@@ -3,49 +3,38 @@ function getCSRFToken() {
     return document.querySelector("[name=csrfmiddlewaretoken]").value;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("✅ script.js carregado!");
+document.getElementById("form-cadastro-turma").addEventListener("submit", function (event) {
+    event.preventDefault();
+    console.log("✅ Evento de submit acionado!");
 
-    let form = document.getElementById("form-cadastro-turma");
+    let formData = new FormData(this);
 
-    if (form) {
-        console.log("✅ Formulário encontrado!");
+    let professores = [];
+    document.querySelectorAll("input[name='professor']:checked").forEach(checkbox => {
+        professores.push(checkbox.value);  // Adiciona os IDs dos professores selecionados
+    });
 
-        form.addEventListener("submit", function (event) {
-            event.preventDefault(); // Evita o reload da página
-            console.log("✅ Evento de submit acionado!");
+    formData.delete("professor");  // Remove duplicações
+    professores.forEach(id => formData.append("professor", id));
 
-            // Captura os dados do formulário
-            let formData = new FormData(form);
+    console.log("📦 Dados enviados:", Object.fromEntries(formData));
 
-            // Exibe os dados antes de enviar (para depuração)
-            for (let pair of formData.entries()) {
-                console.log(`${pair[0]}: ${pair[1]}`);
-            }
-
-            // Envia os dados via fetch
-            fetch("/cadastrar_turma/", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => {
-                console.log("✅ Requisição enviada, aguardando resposta...");
-                return response.json();
-            })
-            .then(data => {
-                console.log("✅ Resposta do servidor recebida:", data);
-                if (data.status === "sucesso") {
-                    alert("Turma cadastrada com sucesso! Código: " + data.codigo);
-                    window.location.reload();
-                } else {
-                    alert("Erro ao cadastrar: " + data.mensagem);
-                }
-            })
-            .catch(error => console.error("❌ Erro na requisição:", error));
-        });
-    } else {
-        console.error("❌ ERRO: Formulário não encontrado!");
-    }
+    fetch("/cadastrar_turma/", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("✅ Resposta do servidor:", data);
+        if (data.status === "sucesso") {
+            Swal.fire("Sucesso!", "Turma cadastrada com sucesso!", "success").then(() => {
+                window.location.reload();
+            });
+        } else {
+            Swal.fire("Erro", data.mensagem, "error");
+        }
+    })
+    .catch(error => console.error("❌ Erro na requisição:", error));
 });
 
 function carregarProfessores() {
@@ -338,36 +327,6 @@ document.getElementById('menu-toggle').addEventListener('click', function() {
     document.getElementById('nav-links').classList.toggle('active');
 });
 
-// JS DO GRÁFICO DE BARRA
-const ctx = document.getElementById('attendanceChart')?.getContext('2d');
-if (ctx) {
-    let attendanceChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Domingo 1', 'Domingo 2', 'Domingo 3', 'Domingo 4', 'Domingo 5'],
-            datasets: [{
-                label: 'Total de Pessoas Presentes',
-                data: [50, 60, 55, 70, 30], // Dados estáticos para exemplo
-                backgroundColor: 'rgba(47, 79, 79, 0.7)',
-                borderColor: 'rgba(47, 79, 79, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-document.getElementById('month-select')?.addEventListener('change', function() {
-    const selectedMonth = this.value;
-    console.log("Mês selecionado:", selectedMonth);
-});
 
 // JS DOS DROPDOWNS NO MENU
 document.querySelectorAll('.dropdown > a').forEach(dropdown => {
@@ -505,64 +464,5 @@ nextButton.addEventListener("click", () => {
 // Inicializa a lista de aniversariantes
 atualizarAniversariantes();
 
-
-//JS DO GRAFICO PARA MEXER NA FONT
-const cxt = document.getElementById('attendanceChart').getContext('2d');
-
-const chart = new Chart(cxt, {
-    type: 'bar',
-    data: {
-        labels: ['Domingo 1', 'Domingo 2', 'Domingo 3', 'Domingo 4', 'Domingo 5'],
-        datasets: [{
-            label: 'Total de Pessoas Presentes',
-            data: [50, 60, 55, 70, 30],
-            backgroundColor: 'rgba(60, 90, 100, 0.7)'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                ticks: {
-                    font: {
-                        size: 14  // Tamanho da fonte padrão
-                    }
-                }
-            },
-            y: {
-                ticks: {
-                    font: {
-                        size: 14  // Tamanho da fonte padrão
-                    }
-                }
-            }
-        },
-        plugins: {
-            legend: {
-                labels: {
-                    font: {
-                        size: 14  
-                    }
-                }
-            }
-        }
-    }
-});
-
-/* Ajustar tamanho da fonte em telas menores */
-function ajustarFonteGrafico() {
-    let tamanhoFonte = window.innerWidth < 550 ? 10 : 14;  
-
-    chart.options.scales.x.ticks.font.size = tamanhoFonte;
-    chart.options.scales.y.ticks.font.size = tamanhoFonte;
-    chart.options.plugins.legend.labels.font.size = tamanhoFonte;
-
-    chart.update(); // Atualiza o gráfico
-}
-
-/* Ouve o evento de redimensionamento da tela */
-window.addEventListener('resize', ajustarFonteGrafico);
-ajustarFonteGrafico();  // Executa uma vez para ajustar ao carregar
 
 

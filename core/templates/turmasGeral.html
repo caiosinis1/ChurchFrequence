@@ -8,13 +8,14 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}"> <!-- Mantendo a navbar -->
     <link rel="stylesheet" href="{% static 'css/turmasGeral.css' %}">
     <script src="{% static 'js/script.js' %}" defer></script>
-    
+    <script src="{% static 'js/turmasGeral.js' %}" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="shortcut icon" href="/core/static/img/logoIPB-fundoPNG.png    " type="image/x-icon">
 </head>
 <body>
     <nav class="navbar">
         <div class="logo">
-            <img src="{% static 'img/logoIPB-fundoPNG.png' %}" alt="Logotipo da Igreja">
+            <img src="{% static '/img/logoIPBbranco.png' %}" alt="Logotipo da Igreja">
         </div>
         <button class="menu-toggle" id="menu-toggle">☰</button>
         <ul class="nav-links" id="nav-links">
@@ -41,6 +42,7 @@
                     <li><a href="{% url 'professores_geral' %}">Geral</a></li>
                 </ul>
             </li>
+            <li><a href="{% url 'relatorios' %}">Relatorios</a></li>
         </ul>
     </nav>
 
@@ -52,6 +54,7 @@
                         <th>Nome</th>
                         <th>Professores</th>
                         <th>Faixa Etária</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="turmas-tabela-body">
@@ -68,6 +71,9 @@
                             {% endif %}
                         </td>
                         <td>{{ turma.faixa_etaria_de }} - {{ turma.faixa_etaria_ate }}</td>
+                        <td>
+                            <button class="btn-excluir-turma" data-turma-id="{{ turma.id }}">🗑️ Excluir</button>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -217,6 +223,6 @@
         </div>
     </div>
 
-    <script src="{% static 'js/turmasGeral.js' %}"></script>
+    
 </body>
 </html>

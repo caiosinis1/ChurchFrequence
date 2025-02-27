@@ -9,11 +9,13 @@
     <link rel="stylesheet" href="{% static 'css/alunosGeral.css' %}">
     <script src="{% static 'js/script.js' %}" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{% static 'js/alunosGeral.js' %}" defer></script>
+    <link rel="shortcut icon" href="/core/static/img/logoIPB-fundoPNG.png    " type="image/x-icon">
 </head>
 <body>
     <nav class="navbar">
         <div class="logo">
-            <img src="{% static 'img/logoIPB-fundoPNG.png' %}" alt="Logotipo da Igreja">
+            <img src="{% static '/img/logoIPBbranco.png' %}" alt="Logotipo da Igreja">
         </div>
         <button class="menu-toggle" id="menu-toggle">☰</button>
         <ul class="nav-links" id="nav-links">
@@ -40,11 +42,18 @@
                     <li><a href="{% url 'professores_geral' %}">Geral</a></li>
                 </ul>
             </li>
+            <li><a href="{% url 'relatorios' %}">Relatorios</a></li>
         </ul>
     </nav>
 
     <main class="alunos-container">
         <section class="alunos-listagem">
+            <div class="filtro-container">
+                <label for="filtro-turma">Filtrar por turma:</label>
+                <select id="filtro-turma">
+                    <option value="">Exibir Todos</option>
+                </select>
+            </div>
             <table class="alunos-tabela">
                 <thead>
                     <tr>
@@ -52,12 +61,16 @@
                         <th>Turma</th>
                         <th>Aniversário</th>
                         <th>Matrícula</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
-                <tbody id="alunos-tabela-body">
-                    <!-- Dados preenchidos dinamicamente -->
-                </tbody>
+                <tbody id="alunos-tabela-body"></tbody>
             </table>
+            <div class="paginacao">
+                <button id="prev-page" disabled>Anterior</button>
+                <span id="page-info"></span>
+                <button id="next-page" disabled>Próximo</button>
+            </div>
         </section>
 
         <section class="alunos-formulario">
@@ -66,7 +79,6 @@
                     <h2 id="alunos-titulo-form">Editar Aluno</h2>
                 </div>
 
-                <!-- Campo de Pesquisa para Escolher o Aluno -->
                 <div class="alunos-form-group">
                     <label for="aluno-pesquisa">Buscar Aluno:</label>
                     <input type="text" id="aluno-pesquisa" class="alunos-input" placeholder="Digite o nome...">
@@ -88,8 +100,6 @@
                         <label for="alunos-turma">Turma:</label>
                         <select id="alunos-turma">
                             <option value="">Selecione uma turma</option>
-                            <option value="turma1">Turma 1</option>
-                            <option value="turma2">Turma 2</option>
                         </select>
                     </div>
                     <button class="alunos-submit" type="submit">Concluir</button>
@@ -199,6 +209,6 @@
         </div>
     </div>
 
-    <script src="{% static 'js/alunosGeral.js' %}"></script>
+    
 </body>
 </html>
