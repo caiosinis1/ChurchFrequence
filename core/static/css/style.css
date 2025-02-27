@@ -227,7 +227,6 @@ canvas {
 }
 
 #month-select-label {
-    margin-left: 1.6rem;
     font-size: 1.2rem;
     font-weight: 500;
 }
@@ -709,11 +708,17 @@ canvas {
     }
 
     #month-select-label{
-        font-size: 17px;
+        font-size: 15px;
     }
 
     #month-select{
         padding: 2px 35px 2px 2px;
-        font-size: 12px;
+        font-size: 11px;
+    }
+}
+
+@media (min-width: 600px) and (max-width: 799px){
+    .card h3{
+        font-size: 14px;
     }
 }

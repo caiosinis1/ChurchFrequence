@@ -35,6 +35,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 from django.templatetags.static import static
+from django.db.utils import IntegrityError
 
 
 def index(request):
@@ -112,24 +113,35 @@ def cadastrar_turma(request):
         nome = request.POST.get("nome-turma")
         faixa_etaria_de = request.POST.get("faixa-etaria-de")
         faixa_etaria_ate = request.POST.get("faixa-etaria-ate")
+        professores_ids = request.POST.getlist("professor")  
 
         if nome and faixa_etaria_de and faixa_etaria_ate:
-            nova_turma = Turma(
-                nome=nome,
-                faixa_etaria_de=int(faixa_etaria_de),
-                faixa_etaria_ate=int(faixa_etaria_ate)
-            )
+            # Verifica se a turma já existe
+            if Turma.objects.filter(nome=nome).exists():
+                return JsonResponse({"status": "erro", "mensagem": "Já existe uma turma com esse nome."}, status=400)
 
-            # Geração do código único
-            nova_turma.codigo = str(uuid.uuid4().hex[:8])
-            print("Dados recebidos:", request.POST)
-            nova_turma.save()
+            try:
+                nova_turma = Turma(
+                    nome=nome,
+                    faixa_etaria_de=int(faixa_etaria_de),
+                    faixa_etaria_ate=int(faixa_etaria_ate),
+                    codigo=str(uuid.uuid4().hex[:8])
+                )
+                nova_turma.save()
 
-            return JsonResponse({"status": "sucesso", "codigo": nova_turma.codigo})
-        else:
-            return JsonResponse({"status": "erro", "mensagem": "Preencha todos os campos."})
+                # 🔹 Corrigido: Atribuição correta do ManyToManyField
+                if professores_ids:
+                    professores = Professor.objects.filter(id__in=professores_ids)
+                    nova_turma.professor_set.set(professores)
 
-    return JsonResponse({"status": "erro", "mensagem": "Método inválido."})
+                return JsonResponse({"status": "sucesso", "codigo": nova_turma.codigo})
+
+            except IntegrityError:
+                return JsonResponse({"status": "erro", "mensagem": "Erro ao cadastrar turma. Nome já cadastrado."}, status=400)
+            except Exception as e:
+                return JsonResponse({"status": "erro", "mensagem": f"Erro inesperado: {str(e)}"}, status=500)
+
+    return JsonResponse({"status": "erro", "mensagem": "Método inválido."}, status=400)
 
 #FUNCOES DE ALUNOS
 from django.http import JsonResponse

@@ -142,6 +142,27 @@
     background: #f0f0f0;
 }
 
+.paginacao {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.pagina-botao {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.pagina-botao.ativo {
+    background-color: #2E7D32;
+}
+
+
 /* ========================== */
 /*      BOTÃO DE CONCLUIR     */
 /* ========================== */

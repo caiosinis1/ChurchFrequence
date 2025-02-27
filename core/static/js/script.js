@@ -3,49 +3,38 @@ function getCSRFToken() {
     return document.querySelector("[name=csrfmiddlewaretoken]").value;
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("✅ script.js carregado!");
+document.getElementById("form-cadastro-turma").addEventListener("submit", function (event) {
+    event.preventDefault();
+    console.log("✅ Evento de submit acionado!");
 
-    let form = document.getElementById("form-cadastro-turma");
+    let formData = new FormData(this);
 
-    if (form) {
-        console.log("✅ Formulário encontrado!");
+    let professores = [];
+    document.querySelectorAll("input[name='professor']:checked").forEach(checkbox => {
+        professores.push(checkbox.value);  // Adiciona os IDs dos professores selecionados
+    });
 
-        form.addEventListener("submit", function (event) {
-            event.preventDefault(); // Evita o reload da página
-            console.log("✅ Evento de submit acionado!");
+    formData.delete("professor");  // Remove duplicações
+    professores.forEach(id => formData.append("professor", id));
 
-            // Captura os dados do formulário
-            let formData = new FormData(form);
+    console.log("📦 Dados enviados:", Object.fromEntries(formData));
 
-            // Exibe os dados antes de enviar (para depuração)
-            for (let pair of formData.entries()) {
-                console.log(`${pair[0]}: ${pair[1]}`);
-            }
-
-            // Envia os dados via fetch
-            fetch("/cadastrar_turma/", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => {
-                console.log("✅ Requisição enviada, aguardando resposta...");
-                return response.json();
-            })
-            .then(data => {
-                console.log("✅ Resposta do servidor recebida:", data);
-                if (data.status === "sucesso") {
-                    alert("Turma cadastrada com sucesso! Código: " + data.codigo);
-                    window.location.reload();
-                } else {
-                    alert("Erro ao cadastrar: " + data.mensagem);
-                }
-            })
-            .catch(error => console.error("❌ Erro na requisição:", error));
-        });
-    } else {
-        console.error("❌ ERRO: Formulário não encontrado!");
-    }
+    fetch("/cadastrar_turma/", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("✅ Resposta do servidor:", data);
+        if (data.status === "sucesso") {
+            Swal.fire("Sucesso!", "Turma cadastrada com sucesso!", "success").then(() => {
+                window.location.reload();
+            });
+        } else {
+            Swal.fire("Erro", data.mensagem, "error");
+        }
+    })
+    .catch(error => console.error("❌ Erro na requisição:", error));
 });
 
 function carregarProfessores() {

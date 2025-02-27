@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("✅ professoresGeral.js carregado!");
 
     let professorSelecionadoId = null;
+    let paginaAtual = 1;
+    const itensPorPagina = 5;
+    let listaProfessores = [];
 
     /* 🔹 Função para carregar os professores na tabela */
     function carregarProfessores() {
@@ -10,33 +13,87 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 console.log("📌 Professores recebidos:", data);
 
-                const tabelaBody = document.getElementById("professores-tabela-body");
-                tabelaBody.innerHTML = ""; // Limpa a tabela antes de inserir novos dados
+                listaProfessores = data.professores;
 
-                data.professores.forEach(professor => {
-                    let row = document.createElement("tr");
-
-                    let turmas = professor.turmas.length > 0 ? professor.turmas.join(", ") : "Nenhuma turma";
-                    let aniversario = professor.aniversario || "N/A";
-
-                    row.innerHTML = `
-                        <td>${professor.nome}</td>
-                        <td>${turmas}</td>
-                        <td>${aniversario}</td>
-                        <td>
-                            <button class="btn-excluir-professor" data-professor-id="${professor.id}">🗑️</button>
-                        </td>
-                    `;
-
-                    // Adiciona evento de clique para carregar os dados no formulário de edição
-                    row.addEventListener("click", function () {
-                        preencherDadosProfessor(professor.id);
-                    });
-
-                    tabelaBody.appendChild(row);
-                });
+                if (window.innerWidth <= 768) {
+                    paginarProfessores();
+                } else {
+                    exibirTodosProfessores();
+                }
             })
             .catch(error => console.error("❌ Erro ao buscar professores:", error));
+    }
+
+    function exibirTodosProfessores() {
+        const tabelaBody = document.getElementById("professores-tabela-body");
+        tabelaBody.innerHTML = "";
+
+        listaProfessores.forEach(professor => {
+            let row = criarLinhaProfessor(professor);
+            tabelaBody.appendChild(row);
+        });
+
+        document.getElementById("paginacao-professores").innerHTML = ""; // Remove os botões de paginação
+    }
+
+    function paginarProfessores() {
+        const tabelaBody = document.getElementById("professores-tabela-body");
+        tabelaBody.innerHTML = "";
+
+        let totalPaginas = Math.ceil(listaProfessores.length / itensPorPagina);
+        let inicio = (paginaAtual - 1) * itensPorPagina;
+        let fim = inicio + itensPorPagina;
+
+        listaProfessores.slice(inicio, fim).forEach(professor => {
+            let row = criarLinhaProfessor(professor);
+            tabelaBody.appendChild(row);
+        });
+
+        criarBotoesPaginacao(totalPaginas);
+    }
+
+
+    function criarLinhaProfessor(professor) {
+        let row = document.createElement("tr");
+
+        let turmas = professor.turmas.length > 0 ? professor.turmas.join(", ") : "Nenhuma turma";
+        let aniversario = professor.aniversario || "N/A";
+
+        row.innerHTML = `
+            <td>${professor.nome}</td>
+            <td>${turmas}</td>
+            <td>${aniversario}</td>
+            <td>
+                <button class="btn-excluir-professor" data-professor-id="${professor.id}">🗑️</button>
+            </td>
+        `;
+
+        row.addEventListener("click", function () {
+            preencherDadosProfessor(professor.id);
+        });
+
+        return row;
+    }
+
+    function criarBotoesPaginacao(totalPaginas) {
+        let paginacaoDiv = document.getElementById("paginacao-professores");
+        paginacaoDiv.innerHTML = "";
+
+        if (totalPaginas > 1) {
+            for (let i = 1; i <= totalPaginas; i++) {
+                let botao = document.createElement("button");
+                botao.textContent = i;
+                botao.classList.add("pagina-botao");
+                if (i === paginaAtual) botao.classList.add("ativo");
+
+                botao.addEventListener("click", function () {
+                    paginaAtual = i;
+                    paginarProfessores();
+                });
+
+                paginacaoDiv.appendChild(botao);
+            }
+        }
     }
 
     /* 🔹 Função para excluir professor */
@@ -223,5 +280,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     /* 🔹 Chama a função para carregar os professores ao carregar a página */
+    window.addEventListener("resize", function () {
+        if (window.innerWidth <= 768) {
+            paginarProfessores();
+        } else {
+            exibirTodosProfessores();
+        }
+    });
+
     carregarProfessores();
 });
