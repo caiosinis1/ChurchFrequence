@@ -63,22 +63,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* 🔹 Gerar Relatório */
     function carregarRelatorio() {
-        const turma = turmaSelect.value;
-        const periodo = periodoSelect.value;
-        const mes = mesSelect.value;
-        const ano = anoSelect.value;
+        const turma = turmaSelect.value || "";
+        const periodo = periodoSelect.value || "mensal";
+        const mes = mesSelect.value || new Date().getMonth() + 1;
+        const ano = anoSelect.value || new Date().getFullYear();
         let semana = "";
-
+    
         if (periodo === "semanal") {
             const semanaSelecionada = document.querySelector('input[name="semana"]:checked');
             if (semanaSelecionada) {
                 semana = semanaSelecionada.value;
             } else {
-                alert("Selecione uma semana!");
+                alert("Selecione uma semana antes de gerar o relatório semanal!");
                 return;
             }
         }
-
+    
         fetch(`/gerar_relatorio/?turma=${turma}&periodo=${periodo}&mes=${mes}&ano=${ano}&semana=${semana}`)
             .then(response => response.json())
             .then(data => {
@@ -93,6 +93,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* 🔹 Exibir Relatório na Tabela */
+    function formatarData(dataISO) {
+        let partes = dataISO.split("-");
+        return `${partes[2]}/${partes[1]}/${partes[0]}`; // Converte "YYYY-MM-DD" para "DD/MM/YYYY"
+    }
+    
     function exibirRelatorio(dados) {
         console.log("📊 Exibindo relatório com dados:", dados);
     
@@ -107,9 +112,16 @@ document.addEventListener("DOMContentLoaded", function () {
         tabelaBody.innerHTML = "";
     
         dados.forEach(linha => {
+            let dataFormatada = linha.data; // Certifique-se de que a data já veio formatada do backend
+    
+            if (!dataFormatada || dataFormatada.includes("undefined")) {
+                console.error("❌ Erro na data recebida:", linha.data);
+                dataFormatada = "Data Inválida"; // Previne que "undefined/undefined/..." apareça
+            }
+    
             let row = `
                 <tr>
-                    <td>${linha.data}</td>
+                    <td>${dataFormatada}</td>
                     <td>${linha.turma || linha.turma_nome || linha["turma__nome"] || "Não Informado"}</td>
                     <td>${linha.presentes}</td>
                     <td>${linha.faltantes}</td>
@@ -118,19 +130,32 @@ document.addEventListener("DOMContentLoaded", function () {
             tabelaBody.innerHTML += row;
         });
     }
-    
 
-    /* 🔹 Exportar Relatório */
+    /* 🔹 Exportar Relatório (Corrigido para incluir Ano e Semana) */
+    function exportarRelatorio(formato) {
+        const turma = turmaSelect.value;
+        const periodo = periodoSelect.value;
+        const mes = mesSelect.value;
+        const ano = anoSelect.value;
+        let semana = "";
+
+        if (periodo === "semanal") {
+            const semanaSelecionada = document.querySelector('input[name="semana"]:checked');
+            if (semanaSelecionada) {
+                semana = semanaSelecionada.value;
+            }
+        }
+
+        window.location.href = `/exportar_${formato}/?turma=${turma}&periodo=${periodo}&mes=${mes}&ano=${ano}&semana=${semana}`;
+    }
+
     exportarPDFBtn.addEventListener("click", function () {
-        window.location.href = `/exportar_pdf/?formato=pdf&turma=${turmaSelect.value}&periodo=${periodoSelect.value}&mes=${mesSelect.value}`;
-    });
-
-    exportarCSVBtn.addEventListener("click", function () {
-        window.location.href = `/exportar_csv/?formato=csv&turma=${turmaSelect.value}&periodo=${periodoSelect.value}&mes=${mesSelect.value}`;
+        exportarRelatorio("pdf");
     });
 
 
-    /* 🔹 Inicializa o carregamento de turmas */
+
+    /* 🔹 Inicializa o carregamento de turmas e anos */
     carregarTurmas();
 
     /* 🔹 Evento para gerar relatório */

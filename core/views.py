@@ -2,8 +2,6 @@ from django.shortcuts import render
 from django.shortcuts import render, redirect
 from .models import Turma
 from .forms import TurmaForm
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
 from .models import Turma, Aluno, Professor
 import uuid
 from django.views.decorators.csrf import csrf_exempt
@@ -12,10 +10,8 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Turma
-import json
 import random
 from django.shortcuts import render, redirect
-from django.http import JsonResponse
 from core.models import Turma
 import uuid
 from .models import Aluno, Presenca
@@ -30,7 +26,15 @@ from datetime import datetime
 from django.db.models import Count, Q
 import calendar 
 from datetime import date, timedelta
-
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.utils import ImageReader
+from django.conf import settings
+import os
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
+from django.templatetags.static import static
 
 
 def index(request):
@@ -679,9 +683,16 @@ def obter_presenca_mensal(request):
 
     for index, domingo in enumerate(domingos, start=1):
         total_presentes = Presenca.objects.filter(data=domingo, presente=True).count()
-        presenca_por_domingo.append({"domingo": f"Domingo {index}", "presentes": total_presentes})
+        total_ausentes = Presenca.objects.filter(data=domingo, presente=False).count()  # Obtendo os ausentes
+
+        presenca_por_domingo.append({
+            "domingo": f"Domingo {index}",
+            "presentes": total_presentes,
+            "ausentes": total_ausentes  # Incluindo os ausentes na resposta
+        })
 
     return JsonResponse({"status": "sucesso", "presencas": presenca_por_domingo})
+
 
 
 
@@ -710,40 +721,75 @@ def gerar_relatorio(request):
     ano = int(ano)
 
     filtros = {"data__month": mes, "data__year": ano}
+
+    # Verifica se turma_id foi fornecido e não está vazio
     if turma_id:
-        filtros["turma_id"] = turma_id
+        try:
+            turma_id = int(turma_id)
+            filtros["turma_id"] = turma_id
+        except ValueError:
+            return JsonResponse({"status": "erro", "mensagem": "ID da turma inválido."}, status=400)
 
     if periodo == "semanal":
         if not semana:
-            return JsonResponse({"status": "erro", "mensagem": "Semana não informada."}, status=400)
+            return JsonResponse({"status": "erro", "mensagem": "Semana não informada para o relatório semanal."}, status=400)
 
         semana = int(semana)
+        ultimo_dia_mes = calendar.monthrange(ano, mes)[1]
 
-        # Obtém todos os domingos do mês
-        _, num_dias = calendar.monthrange(ano, mes)
-        domingos = [date(ano, mes, dia) for dia in range(1, num_dias + 1) if date(ano, mes, dia).weekday() == 6]
+        # Gera a lista correta de domingos dentro do mês
+        domingos_mes = [
+            date(ano, mes, dia)
+            for dia in range(1, ultimo_dia_mes + 1)  # Agora iteramos corretamente até o último dia do mês
+            if date(ano, mes, dia).weekday() == 6  # Filtra apenas domingos
+        ]
 
-        # Verifica se a semana escolhida tem um domingo correspondente
-        if semana > len(domingos) or semana < 1:
-            return JsonResponse({"status": "erro", "mensagem": "Semana inválida para o mês selecionado."}, status=400)
+        if semana > len(domingos_mes):
+            return JsonResponse({"status": "erro", "mensagem": "Semana inválida para este mês."}, status=400)
 
-        data_especifica = domingos[semana - 1]
-        filtros["data"] = data_especifica
+        filtros["data"] = domingos_mes[semana - 1]  # Pega o domingo correspondente
 
-        registros = Presenca.objects.filter(**filtros).values("data", "turma__nome").annotate(
-            presentes=Count("id", filter=Q(presente=True)),
-            faltantes=Count("id", filter=Q(presente=False))
+    registros = Presenca.objects.filter(**filtros).values(
+        "data", "turma__nome"
+    ).annotate(
+        presentes=Count("id", filter=Q(presente=True)),
+        faltantes=Count("id", filter=Q(presente=False))
+    )
+
+    # Formatar a data antes de enviar os registros
+    registros_formatados = []
+    for registro in registros:
+        registro_formatado = registro.copy()
+        registro_formatado["data"] = datetime.strptime(str(registro["data"]), "%Y-%m-%d").strftime("%d/%m/%Y")
+        registros_formatados.append(registro_formatado)
+
+    # Obtém os nomes dos alunos presentes e faltantes
+    alunos_presentes = []
+    alunos_faltantes = []
+    
+    if turma_id:
+        alunos_presentes = list(
+            Aluno.objects.filter(
+                presencas__data__month=mes, 
+                presencas__presente=True, 
+                presencas__turma_id=turma_id
+            ).values_list("nome", flat=True)
         )
 
-    else:  # Relatório mensal
-        registros = Presenca.objects.filter(**filtros).values("data", "turma__nome").annotate(
-            presentes=Count("id", filter=Q(presente=True)),
-            faltantes=Count("id", filter=Q(presente=False))
+        alunos_faltantes = list(
+            Aluno.objects.filter(
+                presencas__data__month=mes, 
+                presencas__presente=False, 
+                presencas__turma_id=turma_id
+            ).values_list("nome", flat=True)
         )
 
-    return JsonResponse({"status": "sucesso", "dados": list(registros)})
-
-
+    return JsonResponse({
+        "status": "sucesso",
+        "dados": registros_formatados,  # Agora os registros já estão formatados corretamente
+        "alunos_presentes": alunos_presentes,
+        "alunos_faltantes": alunos_faltantes
+    })
 
 
 def exportar_csv(request):
@@ -757,29 +803,144 @@ def exportar_csv(request):
     
     return response
 
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
 def exportar_pdf(request):
+    # Parâmetros da requisição
+    turma_id = request.GET.get("turma")
+    periodo = request.GET.get("periodo")
+    mes = request.GET.get("mes")
+    ano = request.GET.get("ano")
+    semana = request.GET.get("semana", "")
+
+    # Obter dados do relatório chamando a função diretamente
+    relatorio_response = gerar_relatorio(request)
+
+    # Certificar-se de que é um JsonResponse antes de processar os dados
+    if not isinstance(relatorio_response, JsonResponse):
+        return HttpResponse("Erro ao gerar relatório.", status=500)
+
+    # Converter a resposta para dicionário Python
+    relatorio_data = json.loads(relatorio_response.content).get("dados", [])
+
+    # Criar resposta HTTP para o PDF
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = 'attachment; filename="relatorio_presenca.pdf"'
-    p = canvas.Canvas(response)
+    
+    p = canvas.Canvas(response, pagesize=A4)
+    largura, altura = A4
+    y = altura - 50  # Posição inicial para escrever
 
-    # Obtém os dados corretamente sem chamar `.json()`
-    relatorio_response = gerar_relatorio(request)
-    relatorio_data = json.loads(relatorio_response.content)  # Decodifica o JSON
+    # Caminho da imagem da logo
+    logo_path = os.path.join(os.path.dirname(__file__), "static", "img", "logoIPB.png")
 
-    print("DEBUG - Resposta do relatório:", relatorio_data)  # Debug para verificar a resposta
+    # Se o arquivo não existir, tenta buscar via staticfiles
+    if not os.path.exists(logo_path):
+        logo_path = static("img/logoIPB.png")
 
-    if relatorio_data.get("status") != "sucesso":
-        p.drawString(100, 800, "Erro ao gerar relatório")
-    else:
-        y = 800
-        p.drawString(100, y, "Relatório de Presença")
+    # Adicionar logotipo (se encontrado)
+    if os.path.exists(logo_path):
+        p.drawImage(ImageReader(logo_path), 40, altura - 100, width=100, height=50)
+
+    # Cabeçalho do relatório
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(200, y, "Relatório de Presença")
+    y -= 20
+    p.setFont("Helvetica", 12)
+    p.drawString(50, y, f"Turma: {turma_id}")
+    y -= 20
+    p.drawString(50, y, f"Período: {periodo.capitalize()}")
+    y -= 20
+    p.drawString(50, y, f"Mês: {mes}")
+    y -= 20
+    p.drawString(50, y, f"Ano: {ano}")
+    y -= 30
+
+    # Listar os registros de presença
+    for registro in relatorio_data:
+        data = registro["data"]
+        turma_nome = registro.get("turma__nome", "Turma Desconhecida")
+        presentes = registro["presentes"]
+        faltantes = registro["faltantes"]
+
+        # Escrever os detalhes da chamada
+        p.setFont("Helvetica-Bold", 12)
+        try:
+        # Se a data já estiver no formato correto "dd/MM/yyyy", apenas utilize
+            data_formatada = datetime.strptime(data, "%d/%m/%Y").strftime("%d/%m/%Y")
+        except ValueError:
+        # Se não estiver no formato esperado, converte do formato "YYYY-MM-DD"
+            data_formatada = datetime.strptime(data, "%Y-%m-%d").strftime("%d/%m/%Y")
+        p.drawString(50, y, f"Data: {data_formatada} | Turma: {turma_nome}")
         y -= 20
-        for item in relatorio_data.get("dados", []):
-            p.drawString(100, y, f"{item['data']} - {item['turma_nome']} - Presentes: {item['presentes']} - Faltantes: {item['faltantes']}")
-            y -= 20
+        p.setFont("Helvetica", 12)
+        p.drawString(50, y, f"Presentes: {presentes} | Faltantes: {faltantes}")
+        y -= 20
 
+        # Buscar alunos **FILTRANDO PELA TURMA CORRETA**
+        filtro_turma = {}
+        if turma_id:
+            try:
+                turma_id = int(turma_id)  # Converte apenas se tiver um valor válido
+                filtro_turma = {"turma_id": turma_id}
+            except ValueError:
+                return HttpResponse("Erro: ID de turma inválido.", status=400)
+
+        # Converter a data para o formato correto antes de buscar no banco
+        try:
+            data_formatada = datetime.strptime(data, "%d/%m/%Y").strftime("%Y-%m-%d")
+        except ValueError:
+            data_formatada = data  # Caso já esteja no formato correto
+
+        # Usar a turma correta para cada chamada individualmente
+        turma_nome = registro.get("turma__nome", "Turma Desconhecida")
+
+        # Buscar alunos PRESENTES para a turma específica
+        alunos_presentes = list(Aluno.objects.filter(
+            presencas__data=data_formatada, 
+            presencas__presente=True,
+            presencas__turma__nome=turma_nome  # Agora filtra corretamente pela turma
+        ).values_list("nome", flat=True))
+
+        # Buscar alunos FALTANTES para a turma específica
+        alunos_faltantes = list(Aluno.objects.filter(
+            presencas__data=data_formatada, 
+            presencas__presente=False,
+            presencas__turma__nome=turma_nome  # Agora filtra corretamente pela turma
+        ).values_list("nome", flat=True))
+
+        # Exibir alunos presentes
+        if alunos_presentes:
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(50, y, "Alunos Presentes:")
+            y -= 15
+            p.setFont("Helvetica", 12)
+            for aluno in alunos_presentes:
+                p.drawString(70, y, f"- {aluno}")
+                y -= 15
+        
+        # Exibir alunos faltantes
+        if alunos_faltantes:
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(50, y, "Alunos Faltantes:")
+            y -= 15
+            p.setFont("Helvetica", 12)
+            for aluno in alunos_faltantes:
+                p.drawString(70, y, f"- {aluno}")
+                y -= 15
+
+        y -= 20  # Espaçamento entre chamadas
+
+        # Verificar se precisa criar uma nova página
+        if y < 100:
+            p.showPage()
+            y = altura - 50  # Reseta a posição no topo da nova página
+
+    # Finalizar PDF
     p.showPage()
     p.save()
+    
     return response
 
 
