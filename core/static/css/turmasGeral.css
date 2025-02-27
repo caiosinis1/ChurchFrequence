@@ -130,10 +130,11 @@
 /* ========================== */
 
 .turmas-professores-lista {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Divide em duas colunas */
+    gap: 8px; /* Espaçamento entre os itens */
+    max-height: 150px; /* Define um tamanho máximo */
+    overflow-y: auto; /* Adiciona scroll se necessário */
 }
 
 .turmas-professores-lista label {
@@ -208,6 +209,7 @@
     .turmas-container {
         flex-direction: column;
         align-items: center;
+        width: 80%;
     }
 
     .turmas-listagem, .turmas-formulario {

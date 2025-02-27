@@ -951,3 +951,41 @@ def exportar_relatorio(request):
     if formato == 'csv':
         return redirect('exportar_csv')
     return redirect('exportar_pdf')
+
+
+#EXCLUSAO CHAMADA
+
+def excluir_chamada(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        turma_id = data.get("turma_id")
+        data_chamada = data.get("data")
+
+        if not data_chamada:
+            return JsonResponse({"status": "erro", "mensagem": "Data não enviada para exclusão."})
+
+        try:
+            turma = Turma.objects.get(id=turma_id)
+
+            # Converter data para o formato correto (YYYY-MM-DD)
+            data_chamada_formatada = datetime.strptime(data_chamada, "%Y-%m-%d").date()
+
+            # Apagar registros de presença dessa turma e data
+            presencas_deletadas, _ = Presenca.objects.filter(turma=turma, data=data_chamada_formatada).delete()
+
+            if presencas_deletadas > 0:
+                return JsonResponse({"status": "sucesso", "mensagem": "Chamada excluída com sucesso"})
+            else:
+                return JsonResponse({"status": "erro", "mensagem": "Nenhuma chamada encontrada para essa data."})
+
+        except Turma.DoesNotExist:
+            return JsonResponse({"status": "erro", "mensagem": "Turma não encontrada"})
+
+        except ValueError:
+            return JsonResponse({"status": "erro", "mensagem": "Formato de data inválido."})
+
+        except Exception as e:
+            return JsonResponse({"status": "erro", "mensagem": str(e)})
+
+    return JsonResponse({"status": "erro", "mensagem": "Método inválido"}, status=400)

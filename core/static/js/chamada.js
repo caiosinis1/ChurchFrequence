@@ -219,4 +219,63 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(error => console.error("❌ Erro ao salvar presença:", error));
     });
+
+    document.getElementById("btn-excluir-chamada").addEventListener("click", function () {
+        console.log("🗑️ Botão de excluir chamada clicado!");
+    
+        const turmaId = turmaSelect.value;
+        const mes = mesSelect.value;
+        const ano = anoSelect.value;
+        const domingo = domingoSelect.value;
+    
+        if (!turmaId || !mes || !ano || !domingo) {
+            Swal.fire({
+                icon: "error",
+                title: "Erro!",
+                text: "Selecione todos os filtros para excluir a chamada."
+            });
+            return;
+        }
+    
+        // 🔹 Criar a data no formato YYYY-MM-DD
+        let data_chamada = `${ano}-${mes.padStart(2, "0")}-${domingo.padStart(2, "0")}`;
+    
+        console.log("📅 Data formatada para exclusão:", data_chamada);
+    
+        Swal.fire({
+            title: "Tem certeza?",
+            text: "Essa ação excluirá a chamada desse dia!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sim, excluir",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch("/excluir_chamada/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                    },
+                    body: JSON.stringify({
+                        turma_id: parseInt(turmaId),
+                        data: data_chamada
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "sucesso") {
+                        Swal.fire("Excluído!", "A chamada foi removida com sucesso.", "success")
+                            .then(() => window.location.reload());
+                    } else {
+                        Swal.fire("Erro!", data.mensagem, "error");
+                    }
+                })
+                .catch(error => console.error("❌ Erro ao excluir chamada:", error));
+            }
+        });
+    });
+    
 });

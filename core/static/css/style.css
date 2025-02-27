@@ -299,7 +299,7 @@ canvas {
 /* ========================== */
 
 /* Ajuste do menu hamburguer */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .navbar {
         display: flex;
         justify-content: space-between;

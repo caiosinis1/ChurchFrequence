@@ -46,6 +46,7 @@
                     <li><a href="{% url 'professores_geral' %}">Geral</a></li>
                 </ul>
             </li>
+            <li><a href="{% url 'relatorios' %}">Relatorios</a></li>
         </ul>
     </nav>
 
@@ -92,6 +93,8 @@
             </div>
         
             <button id="salvar-presenca-chamada" class="botao-chamada">Salvar Presença</button>
+            <button class="btn-excluir-chamada" id="btn-excluir-chamada" data-turma="{{ turma.id }}" data-data="{{ data_chamada }}">Excluir Chamada</button>
+
         </div>
         
         <!-- Adicionando o gráfico -->

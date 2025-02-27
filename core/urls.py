@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import home, turmas_geral, professores_geral, alunos_geral, chamada, cadastrar_turma, cadastrar_aluno, listar_turmas,cadastrar_professor,obter_totais, atualizar_turma, detalhar_turma, listar_turmas_completas, listar_professores, listar_alunos, detalhar_aluno, atualizar_aluno, listar_professores_geral,  atualizar_professor, detalhar_professor, listar_presenca, salvar_presenca, listar_aniversariantes, excluir_turma, excluir_aluno, excluir_professor, obter_presenca_mensal, relatorios, gerar_relatorio, exportar_csv, exportar_pdf
+from .views import home, turmas_geral, professores_geral, alunos_geral, chamada, cadastrar_turma, cadastrar_aluno, listar_turmas,cadastrar_professor,obter_totais, atualizar_turma, detalhar_turma, listar_turmas_completas, listar_professores, listar_alunos, detalhar_aluno, atualizar_aluno, listar_professores_geral,  atualizar_professor, detalhar_professor, listar_presenca, salvar_presenca, listar_aniversariantes, excluir_turma, excluir_aluno, excluir_professor, obter_presenca_mensal, relatorios, gerar_relatorio, exportar_csv, exportar_pdf, excluir_chamada
 
 urlpatterns = [
     path('', home, name='home'),
@@ -33,6 +33,7 @@ urlpatterns = [
     path("gerar_relatorio/", gerar_relatorio, name="gerar_relatorio"),
     path("exportar_csv/", exportar_csv, name="exportar_csv"),
     path("exportar_pdf/", exportar_pdf, name="exportar_pdf"),
+    path("excluir_chamada/", excluir_chamada, name="excluir_chamada"),
 
 
 ]
