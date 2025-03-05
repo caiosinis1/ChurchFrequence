@@ -21,7 +21,7 @@ from django.shortcuts import render
 from .models import Presenca, Turma, Aluno
 import csv
 from io import StringIO
-from reportlab.pdfgen import canvas # type: ignore
+from reportlab.pdfgen import canvas 
 from datetime import datetime
 from django.db.models import Count, Q
 import calendar 
