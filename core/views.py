@@ -637,7 +637,7 @@ def salvar_presenca(request):
     return JsonResponse({"status": "erro", "mensagem": "Método inválido."}, status=400)
 
 
-#Aniversariantes
+ #Aniversariantes
 def listar_aniversariantes(request):
     mes = request.GET.get("mes")
     
@@ -704,6 +704,7 @@ def obter_presenca_mensal(request):
         })
 
     return JsonResponse({"status": "sucesso", "presencas": presenca_por_domingo})
+
 
 
 

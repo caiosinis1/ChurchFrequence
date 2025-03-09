@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const ctx = document.getElementById("grafico")?.getContext("2d");
     const monthSelect = document.getElementById("month-select");
 
-    let attendanceChart = null; // Variável global do gráfico
+    let attendanceChart = null;
 
     function atualizarGrafico(mes, ano) {
         console.log(`🔄 Carregando presença para ${mes}/${ano}`);
@@ -17,24 +17,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 console.log("📊 Dados recebidos da API:", data.presencas);
 
-                // Ordenando corretamente os domingos
                 data.presencas.sort((a, b) => a.domingo.localeCompare(b.domingo, undefined, { numeric: true }));
 
                 const labels = data.presencas.map(item => item.domingo);
                 const valoresPresentes = data.presencas.map(item => item.presentes);
-                const valoresAusentes = data.presencas.map(item => item.ausentes ?? 0); // Certificando-se de que "ausentes" sempre tem um valor
+                const valoresAusentes = data.presencas.map(item => item.ausentes ?? 0);
 
                 console.log("📌 Labels geradas:", labels);
                 console.log("📌 Valores Presentes:", valoresPresentes);
                 console.log("📌 Valores Ausentes:", valoresAusentes);
 
-                // **DESTRUIR O GRÁFICO ANTERIOR SE EXISTIR**
                 if (attendanceChart !== null) {
                     console.log("🛠️ Destruindo gráfico antigo...");
                     attendanceChart.destroy();
                 }
 
-                // **CRIANDO NOVO GRÁFICO COM PRESENTES E AUSENTES**
                 attendanceChart = new Chart(ctx, {
                     type: "bar",
                     data: {
@@ -43,14 +40,14 @@ document.addEventListener("DOMContentLoaded", function () {
                             {
                                 label: "Presentes",
                                 data: valoresPresentes,
-                                backgroundColor: "rgb(46, 119, 46)", // Verde
+                                backgroundColor: "rgb(46, 119, 46)",
                                 borderColor: "rgb(41, 121, 41)",
                                 borderWidth: 1
                             },
                             {
                                 label: "Ausentes",
                                 data: valoresAusentes,
-                                backgroundColor: "rgb(172, 51, 77)", // Vermelho
+                                backgroundColor: "rgb(172, 51, 77)",
                                 borderColor: "rgb(133, 29, 51)",
                                 borderWidth: 1
                             }
@@ -67,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             x: {
                                 ticks: {
                                     font: {
-                                        size: window.innerWidth <= 600 ? 10 : 14 // Reduz fonte em telas menores
+                                        size: window.innerWidth <= 600 ? 10 : 14
                                     }
                                 }
                             },
@@ -84,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             legend: {
                                 labels: {
                                     font: {
-                                        size: window.innerWidth <= 600 ? 10 : 14 // Reduz fonte de "Presentes" e "Ausentes"
+                                        size: window.innerWidth <= 600 ? 10 : 14
                                     }
                                 }
                             },
@@ -97,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                 },
                                 callbacks: {
                                     title: function (tooltipItems) {
-                                        return tooltipItems[0].label; // Corrige a exibição do título no tooltip
+                                        return tooltipItems[0].label;
                                     },
                                     label: function (tooltipItem) {
                                         return `${tooltipItem.dataset.label}: ${tooltipItem.raw}`;
@@ -114,10 +111,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     monthSelect.addEventListener("change", function () {
-        const mesSelecionado = monthSelect.value.toLowerCase();
+        const mesSelecionado = monthSelect.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const anoAtual = new Date().getFullYear();
+
         const mesesDict = {
-            "janeiro": 1, "fevereiro": 2, "março": 3, "abril": 4, "maio": 5, "junho": 6,
+            "janeiro": 1, "fevereiro": 2, "marco": 3, "março": 3, "abril": 4, "maio": 5, "junho": 6,
             "julho": 7, "agosto": 8, "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12
         };
 
@@ -130,18 +128,20 @@ document.addEventListener("DOMContentLoaded", function () {
         atualizarGrafico(mesNumero, anoAtual);
     });
 
-    // Adiciona evento de redimensionamento para ajustar a fonte em tempo real
-    window.addEventListener("resize", function () {
-        if (attendanceChart) {
-            attendanceChart.options.scales.x.ticks.font.size = window.innerWidth <= 600 ? 10 : 14;
-            attendanceChart.options.scales.y.ticks.font.size = window.innerWidth <= 600 ? 10 : 14;
-            attendanceChart.options.plugins.legend.labels.font.size = window.innerWidth <= 600 ? 10 : 14;
-            attendanceChart.update();
-        }
-    });
+    // 🔴 SOLUÇÃO PARA DEFINIR O MÊS PADRÃO AO CARREGAR A PÁGINA
+    const mesAtual = new Date().toLocaleString("pt-BR", { month: "long" }).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    monthSelect.value = mesAtual; // Seleciona o mês atual no <select>
 
-    // Carregar gráfico ao abrir a página com o mês atual
-    const mesAtual = new Date().toLocaleString("pt-BR", { month: "long" }).toLowerCase();
-    monthSelect.value = mesAtual;
-    atualizarGrafico(new Date().getMonth() + 1, new Date().getFullYear());
+    // Garante que o mês selecionado no <select> existe no dicionário antes de atualizar o gráfico
+    const mesesDict = {
+        "janeiro": 1, "fevereiro": 2, "marco": 3, "março": 3, "abril": 4, "maio": 5, "junho": 6,
+        "julho": 7, "agosto": 8, "setembro": 9, "outubro": 10, "novembro": 11, "dezembro": 12
+    };
+
+    const mesNumeroInicial = mesesDict[mesAtual];
+    if (mesNumeroInicial) {
+        atualizarGrafico(mesNumeroInicial, new Date().getFullYear());
+    } else {
+        console.error("❌ Mês inválido na inicialização:", mesAtual);
+    }
 });

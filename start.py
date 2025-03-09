@@ -1,41 +1,57 @@
-import os
 import sys
+import os
 import subprocess
-import sys
-import os
-import controle_presenca 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import time
+import webbrowser
+import locale
 
-import os
-os.system("python manage.py runserver 127.0.0.1:8080")
+# Define o encoding correto
+if sys.stdout:
+    sys.stdout.reconfigure(encoding='utf-8')
 
+if sys.stderr:
+    sys.stderr.reconfigure(encoding='utf-8')
 
-# Verifique se o módulo está acessível
-try:
-    import controle_presenca
-except ImportError:
-    print("Erro: Módulo 'controle_presenca' não encontrado!")
-# Obtém o diretório do PyInstaller (quando em modo empacotado)
+# Obtém o diretório base do PyInstaller
 BASE_DIR = getattr(sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
 
-# Adiciona o diretório base ao sys.path
-sys.path.append(BASE_DIR)
-
-# Define a variável de ambiente para as configurações do Django
+# Define a variável de ambiente para o Django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "controle_presenca.settings")
 
 # Caminho correto do manage.py
 manage_py = os.path.join(BASE_DIR, "manage.py")
 
-# Caminho para o manage.py correto
-manage_path = os.path.join(BASE_DIR, "manage.py")
-
-# Verifica se manage.py existe antes de executar
-if not os.path.exists(manage_path):
-    print(f"Erro: O arquivo manage.py não foi encontrado no caminho esperado: {manage_path}")
+# Verifica se o arquivo manage.py existe
+if not os.path.exists(manage_py):
+    print(f"❌ Erro: O arquivo manage.py não foi encontrado em {manage_py}")
     sys.exit(1)
 
-print(f"Iniciando Django... ({manage_py})")
+print(f"📌 Iniciando Django... ({manage_py})")
 
-# Inicia o servidor Django
-subprocess.run(["python", manage_py, "runserver", "127.0.0.1:8080"])
+# Inicia o servidor Django e captura a saída corretamente
+server_process = subprocess.Popen(
+    ["python", manage_py, "runserver", "127.0.0.1:8080"],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True,
+    encoding='utf-8'  # Forçando UTF-8
+)
+
+# Aguarda um tempo para iniciar
+time.sleep(3)
+
+# Abre o navegador
+webbrowser.open("http://127.0.0.1:8080/")
+
+# Exibir saída do Django no terminal para depuração
+while True:
+    output = server_process.stdout.readline()
+    if output:
+        print(output.strip())
+
+    error = server_process.stderr.readline()
+    if error:
+        print("❌ ERRO:", error.strip())
+
+    if server_process.poll() is not None:
+        break
