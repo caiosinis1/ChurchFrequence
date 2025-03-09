@@ -34,26 +34,84 @@ document.addEventListener("DOMContentLoaded", function () {
     function atualizarDomingos() {
         const mes = mesSelect.value;
         const ano = anoSelect.value;
-
+    
         if (!mes || !ano) return;
-
+    
         domingoSelect.innerHTML = '<option value="">Selecione um domingo</option>';
         let data = new Date(ano, mes - 1, 1);
+    
+        let domingos = [];  // Lista para armazenar os domingos válidos
+    
         while (data.getMonth() == mes - 1) {
             if (data.getDay() == 0) { // Se for domingo
-                let option = document.createElement("option");
-                option.value = data.getDate();
-                option.textContent = `Domingo ${data.getDate()}`;
-                domingoSelect.appendChild(option);
+                domingos.push(data.getDate());
             }
             data.setDate(data.getDate() + 1);
         }
+    
+        // Garante que estamos pegando apenas domingos existentes no mês
+        domingos.forEach((dia, index) => {
+            let option = document.createElement("option");
+            option.value = dia;
+            option.textContent = `Domingo ${index + 1} (${dia}/${mes})`; // Melhor exibição
+            domingoSelect.appendChild(option);
+        });
     }
 
     mesSelect.addEventListener("change", atualizarDomingos);
     anoSelect.addEventListener("change", atualizarDomingos);
 
     // Carregar alunos ao selecionar todos os filtros
+    
+
+    // Atualizar gráfico de presença
+    function atualizarGrafico(presentes, ausentes) {
+        console.log("🔹 Atualizando gráfico: Presentes:", presentes, "Ausentes:", ausentes);
+    
+        const canvas = document.getElementById("graficoPresenca");
+        const graficoContainer = document.querySelector(".grafico-card");
+    
+        if (!canvas) {
+            console.error("❌ Canvas do gráfico não encontrado!");
+            return;
+        }
+    
+        // Garante que o gráfico está visível
+        graficoContainer.style.display = "flex";
+        canvas.style.display = "block";
+        canvas.style.opacity = "1";
+    
+        const ctx = canvas.getContext("2d");
+    
+        // Remove gráfico anterior, se existir
+        if (window.graficoPresenca && typeof window.graficoPresenca.destroy === "function") {
+            console.log("🗑️ Removendo gráfico antigo...");
+            window.graficoPresenca.destroy();
+        }
+    
+        console.log("📊 Criando novo gráfico...");
+        window.graficoPresenca = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: ["Presentes", "Faltantes"],
+                datasets: [{
+                    data: [presentes, ausentes],
+                    backgroundColor: ["#4CAF50", "#FF4C4C"],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+    
+        console.log("✅ Gráfico atualizado com sucesso!");
+    }
+
+    
     function carregarAlunos() {
         const turmaId = turmaSelect.value;
         const mes = mesSelect.value;
@@ -82,39 +140,15 @@ document.addEventListener("DOMContentLoaded", function () {
                                   </label><br>`;
                 });
                 listaAlunos.innerHTML = listaHtml;
+                console.log("📊 Dados recebidos da API para o gráfico:", {
+                    presentes: data.presentes,
+                    ausentes: data.faltantes
+                });
                 atualizarGrafico(data.presentes, data.faltantes);
             })
             .catch(error => console.error("Erro ao buscar alunos:", error));
     }
-
-    // Atualizar gráfico de presença
-    function atualizarGrafico(presentes, ausentes) {
-        const ctx = document.getElementById("graficoPresenca").getContext("2d");
     
-        // Destroi o gráfico anterior, se existir
-        if (window.graficoPresenca) {
-            window.graficoPresenca.destroy();
-        }
-    
-        // Cria um novo gráfico
-        window.graficoPresenca = new Chart(ctx, {
-            type: "doughnut",
-            data: {
-                labels: ["Presentes", "Faltantes"],
-                datasets: [{
-                    data: [presentes, ausentes],
-                    backgroundColor: ["#4CAF50", "#FF4C4C"],
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: "bottom" }
-                }
-            }
-        });
-    }
 
     // Evento de mudança para carregar alunos ao selecionar turma, mês, ano e domingo
     turmaSelect.addEventListener("change", carregarAlunos);
@@ -139,20 +173,16 @@ document.addEventListener("DOMContentLoaded", function () {
         const ano = anoSelect.value;
         const domingo = domingoSelect.value;
         const presencas = [];
-
+    
         document.querySelectorAll(".presenca-checkbox").forEach(input => {
             presencas.push({ 
-                aluno_id: parseInt(input.dataset.alunoId), // CORRIGIDO: Agora está pegando aluno_id corretamente
+                aluno_id: parseInt(input.dataset.alunoId), 
                 presente: input.checked 
             });
         });
     
         console.log("🔎 Verificação antes do envio:");
-        console.log("Turma:", turmaId);
-        console.log("Mês:", mes);
-        console.log("Ano:", ano);
-        console.log("Domingo:", domingo);
-        console.log("Presenças:", presencas);
+        console.log({ turmaId, mes, ano, domingo, presencas });
     
         if (!turmaId || !mes || !ano || !domingo || presencas.length === 0) {
             Swal.fire({
@@ -184,10 +214,68 @@ document.addEventListener("DOMContentLoaded", function () {
                 title: data.mensagem
             });
             if (data.status === "sucesso") {
-                carregarAlunos(); // Atualiza a lista e o gráfico
+                carregarAlunos();
             }
         })
         .catch(error => console.error("❌ Erro ao salvar presença:", error));
     });
 
+    document.getElementById("btn-excluir-chamada").addEventListener("click", function () {
+        console.log("🗑️ Botão de excluir chamada clicado!");
+    
+        const turmaId = turmaSelect.value;
+        const mes = mesSelect.value;
+        const ano = anoSelect.value;
+        const domingo = domingoSelect.value;
+    
+        if (!turmaId || !mes || !ano || !domingo) {
+            Swal.fire({
+                icon: "error",
+                title: "Erro!",
+                text: "Selecione todos os filtros para excluir a chamada."
+            });
+            return;
+        }
+    
+        // 🔹 Criar a data no formato YYYY-MM-DD
+        let data_chamada = `${ano}-${mes.padStart(2, "0")}-${domingo.padStart(2, "0")}`;
+    
+        console.log("📅 Data formatada para exclusão:", data_chamada);
+    
+        Swal.fire({
+            title: "Tem certeza?",
+            text: "Essa ação excluirá a chamada desse dia!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sim, excluir",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch("/excluir_chamada/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                    },
+                    body: JSON.stringify({
+                        turma_id: parseInt(turmaId),
+                        data: data_chamada
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "sucesso") {
+                        Swal.fire("Excluído!", "A chamada foi removida com sucesso.", "success")
+                            .then(() => window.location.reload());
+                    } else {
+                        Swal.fire("Erro!", data.mensagem, "error");
+                    }
+                })
+                .catch(error => console.error("❌ Erro ao excluir chamada:", error));
+            }
+        });
+    });
+    
 });

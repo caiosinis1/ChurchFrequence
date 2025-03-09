@@ -1,0 +1,225 @@
+/* Estilização da página de relatórios */
+.relatorios-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 1.5rem;
+}
+
+.relatorios-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #0f0f0f;
+}
+
+/* Filtros do relatório */
+.filtro-relatorios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filtro-relatorios select,
+.filtro-relatorios button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.filtro-relatorios select {
+    background: #f9f9f9;
+    min-width: 150px;
+    text-align: center;
+}
+
+#gerar-relatorio {
+    background-color: #1a4d2e;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#gerar-relatorio:hover {
+    background-color: #163b24;
+}
+
+/* Seletor de semanas */
+#semanas-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f8f8f8;
+    border-radius: 8px;
+}
+
+#semanas-container p {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+}
+
+#semanas-container label {
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Tabela do relatório */
+.resultado-relatorios {
+    margin-top: 20px;
+}
+
+.tabela-relatorio {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tabela-relatorio th, 
+.tabela-relatorio td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+.tabela-relatorio th {
+    background-color: #0f4621;
+    color: white;
+    font-weight: bold;
+}
+
+.tabela-relatorio tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.tabela-relatorio tr:hover {
+    background-color: #ddd;
+}
+
+.filtro-relatorios select {
+    text-align: left;
+    font-weight:  500;
+}
+
+/* Botões de exportação */
+.exportar-btns {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.exportar-btns button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    font-weight: bold;
+}
+
+.exportar-btns .btn-pdf {
+    background: #d9534f;
+    color: white;
+}
+
+.exportar-btns .btn-csv {
+    background: #0275d8;
+    color: white;
+}
+
+.exportar-btns button:hover {
+    opacity: 0.8;
+}
+
+/* Responsividade */
+@media (max-width: 700px) {
+    .filtro-relatorios {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #semanas-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .tabela-relatorio th,
+    .tabela-relatorio td {
+        padding: 6px;
+    }
+
+    .relatorios-container h2 {
+        font-size: 18px;
+    }
+    
+    .filtro-relatorios select {
+        padding: 6px;
+        font-size: 14px;
+    }
+
+    .exportar-btns button{
+        font-size: 12.5px;
+        padding: 6.4px;
+        font-weight: 600;
+    }
+
+    .tabela-relatorio th{
+        font-size: 10px;
+    }
+    .tabela-relatorio td{
+        font-size: 9.6px;
+    }
+    
+}
+
+@media (min-width: 701px) and (max-width: 768px){
+
+    #semanas-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .tabela-relatorio th,
+    .tabela-relatorio td {
+        padding: 7px;
+    }
+
+    .relatorios-container h2 {
+        font-size: 20px;
+    }
+    
+    .filtro-relatorios select {
+        padding: 6px;
+        font-size: 14px;
+    }
+
+    .exportar-btns button{
+        font-size: 14px;
+        padding: 7.3px;
+        font-weight: 600;
+    }
+
+    .tabela-relatorio th{
+        font-size: 15px;
+    }
+    .tabela-relatorio td{
+        font-size: 14px;
+    }
+}

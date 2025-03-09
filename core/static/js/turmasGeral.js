@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("✅ Formulário encontrado:", form);
 
-
     /* 🔹 Função para carregar as turmas na tabela e no select */
     function carregarTurmas() {
         console.log("🔄 Rodando a função carregarTurmas()");
@@ -40,8 +39,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     let row = document.createElement("tr");
                     row.innerHTML = `
                         <td>${turma.nome}</td>
-                        <td>${turma.professores.join(", ")}</td>  <!-- Exibe os professores -->
+                        <td>${turma.professores.join(", ")}</td>
                         <td>${turma.faixa_etaria_de} - ${turma.faixa_etaria_ate}</td>
+                        <td>
+                            <button class="btn-excluir-turma" data-turma-id="${turma.id}">🗑️</button>
+                        </td>
                     `;
                     tabelaTurmas.appendChild(row);
 
@@ -55,70 +57,70 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => console.error("❌ Erro ao buscar turmas:", error));
     }
 
-  /* 🔹 Função para preencher os detalhes da turma no formulário de edição */
-  function preencherDadosTurma(turmaId) {
-    fetch(`/detalhar_turma/${turmaId}/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "sucesso") {
-                let turma = data.turma;
-                console.log("📌 Detalhes da turma recebidos:", turma);
+    /* 🔹 Função para preencher os detalhes da turma no formulário de edição */
+    function preencherDadosTurma(turmaId) {
+        fetch(`/detalhar_turma/${turmaId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "sucesso") {
+                    let turma = data.turma;
+                    console.log("📌 Detalhes da turma recebidos:", turma);
 
-                document.getElementById("turmas-nome").value = turma.nome;
-                document.getElementById("turmas-faixa-de").value = turma.faixa_etaria_de;
-                document.getElementById("turmas-faixa-ate").value = turma.faixa_etaria_ate;
+                    document.getElementById("turmas-nome").value = turma.nome;
+                    document.getElementById("turmas-faixa-de").value = turma.faixa_etaria_de;
+                    document.getElementById("turmas-faixa-ate").value = turma.faixa_etaria_ate;
 
-                // Atualiza os professores responsáveis
-                carregarProfessoresEdicao(turma.professores);
-            } else {
-                console.error("Erro ao buscar detalhes da turma:", data.mensagem);
-            }
-        })
-        .catch(error => console.error("❌ Erro ao buscar turma:", error));
-}
-
-/* 🔹 Função para carregar professores e marcar os vinculados à turma */
-function carregarProfessoresEdicao(professoresTurma) {
-    fetch("/listar_professores/")
-        .then(response => response.json())
-        .then(data => {
-            console.log("📌 Professores recebidos para edição:", data);
-
-            let listaProfessores = document.getElementById("turmas-professores");
-
-            if (!listaProfessores) {
-                console.error("❌ Elemento #turmas-professores não encontrado");
-                return;
-            }
-
-            listaProfessores.innerHTML = "";
-
-            if (data.professores.length === 0) {
-                listaProfessores.innerHTML = "<p>Nenhum professor cadastrado</p>";
-            } else {
-                data.professores.forEach(professor => {
-                    let isChecked = professoresTurma.includes(professor.id) ? "checked" : "";
-
-                    let label = document.createElement("label");
-                    label.innerHTML = `<input type="checkbox" name="turmas-professor" value="${professor.id}" ${isChecked}> ${professor.nome}`;
-                    listaProfessores.appendChild(label);
-                });
-            }
-        })
-        .catch(error => console.error("❌ Erro ao buscar professores:", error));
-}
-
-/* 🔹 Captura a mudança no select de turmas e preenche os dados no formulário */
-document.getElementById("turma-selecionada")?.addEventListener("change", function () {
-    let turmaId = this.value;
-    if (turmaId) {
-        preencherDadosTurma(turmaId);
+                    // Atualiza os professores responsáveis
+                    carregarProfessoresEdicao(turma.professores);
+                } else {
+                    console.error("Erro ao buscar detalhes da turma:", data.mensagem);
+                }
+            })
+            .catch(error => console.error("❌ Erro ao buscar turma:", error));
     }
-});
+
+    /* 🔹 Função para carregar professores e marcar os vinculados à turma */
+    function carregarProfessoresEdicao(professoresTurma) {
+        fetch("/listar_professores/")
+            .then(response => response.json())
+            .then(data => {
+                console.log("📌 Professores recebidos para edição:", data);
+
+                let listaProfessores = document.getElementById("turmas-professores");
+
+                if (!listaProfessores) {
+                    console.error("❌ Elemento #turmas-professores não encontrado");
+                    return;
+                }
+
+                listaProfessores.innerHTML = "";
+
+                if (data.professores.length === 0) {
+                    listaProfessores.innerHTML = "<p>Nenhum professor cadastrado</p>";
+                } else {
+                    data.professores.forEach(professor => {
+                        let isChecked = professoresTurma.includes(professor.id) ? "checked" : "";
+
+                        let label = document.createElement("label");
+                        label.innerHTML = `<input type="checkbox" name="turmas-professor" value="${professor.id}" ${isChecked}> ${professor.nome}`;
+                        listaProfessores.appendChild(label);
+                    });
+                }
+            })
+            .catch(error => console.error("❌ Erro ao buscar professores:", error));
+    }
+
+    /* 🔹 Captura a mudança no select de turmas e preenche os dados no formulário */
+    document.getElementById("turma-selecionada")?.addEventListener("change", function () {
+        let turmaId = this.value;
+        if (turmaId) {
+            preencherDadosTurma(turmaId);
+        }
+    });
 
     /* 🔹 Atualizar turma */
     document.getElementById("turmas-form")?.addEventListener("submit", function (event) {
-        event.preventDefault(); // Previne o recarregamento da página
+        event.preventDefault();
         console.log("🛠 Evento de submit acionado!"); 
     
         let turmaId = document.getElementById("turma-selecionada").value;
@@ -139,7 +141,6 @@ document.getElementById("turma-selecionada")?.addEventListener("change", functio
             professores: professores
         });
     
-        // 🚨 Se algum dado estiver undefined ou vazio, interrompe a função
         if (!turmaId || !nome || !faixaEtariaDe || !faixaEtariaAte) {
             console.error("❌ Dados inválidos! Verifique os campos.");
             return;
@@ -147,38 +148,75 @@ document.getElementById("turma-selecionada")?.addEventListener("change", functio
     
         console.log("📡 Enviando requisição para atualizar turma...");
 
-fetch("/atualizar_turma/", {
-    method: "POST",
-    body: JSON.stringify({
-        id: turmaId,
-        nome: nome,
-        faixa_etaria_de: faixaEtariaDe,
-        faixa_etaria_ate: faixaEtariaAte,
-        professores: professores
-    }),
-    headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
-    }
-})
-.then(response => {
-    console.log("📡 Requisição enviada! Status:", response.status);
-    return response.json();
-})
-.then(data => {
-    console.log("✅ Resposta do servidor:", data);
-    if (data.status === "sucesso") {
-        Swal.fire("Sucesso!", "Turma atualizada com sucesso!", "success").then(() => {
-            carregarTurmas();
-        });
-    } else {
-        Swal.fire("Erro", data.mensagem, "error");
-    }
-})
-.catch(error => console.error("❌ Erro ao atualizar turma:", error));
+        fetch("/atualizar_turma/", {
+            method: "POST",
+            body: JSON.stringify({
+                id: turmaId,
+                nome: nome,
+                faixa_etaria_de: faixaEtariaDe,
+                faixa_etaria_ate: faixaEtariaAte,
+                professores: professores
+            }),
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("✅ Resposta do servidor:", data);
+            if (data.status === "sucesso") {
+                Swal.fire("Sucesso!", "Turma atualizada com sucesso!", "success").then(() => {
+                    carregarTurmas();
+                });
+            } else {
+                Swal.fire("Erro", data.mensagem, "error");
+            }
+        })
+        .catch(error => console.error("❌ Erro ao atualizar turma:", error));
     });
-    
 
-    /* 🔹 Chama a função para carregar as turmas ao carregar a página */
+    /* 🔹 Função para excluir turma */
+    function excluirTurma(turmaId) {
+        Swal.fire({
+            title: "Tem certeza?",
+            text: "Essa ação não pode ser desfeita!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Sim, excluir!",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/excluir_turma/${turmaId}/`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "sucesso") {
+                        Swal.fire("Excluído!", data.mensagem, "success");
+                        carregarTurmas();
+                    } else {
+                        Swal.fire("Erro!", data.mensagem, "error");
+                    }
+                })
+                .catch(error => console.error("❌ Erro ao excluir turma:", error));
+            }
+        });
+    }
+
+    /* 🔹 Evento para clicar no botão de exclusão */
+    document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("btn-excluir-turma")) {
+            let turmaId = event.target.dataset.turmaId;
+            excluirTurma(turmaId);
+        }
+    });
+
     carregarTurmas();
 });

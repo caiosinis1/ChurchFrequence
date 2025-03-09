@@ -9,11 +9,12 @@
     <link rel="stylesheet" href="{% static 'css/professoresGeral.css' %}"> <!-- Estilo específico desta página -->
     <script src="{% static 'js/script.js' %}" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="shortcut icon" href="/core/static/img/logoIPB-fundoPNG.png    " type="image/x-icon">
 </head>
 <body>
     <nav class="navbar">
         <div class="logo">
-            <img src="{% static 'img/logoIPB-fundoPNG.png' %}" alt="Logotipo da Igreja">
+            <img src="{% static '/img/logoIPBbranco.png' %}" alt="Logotipo da Igreja">
         </div>
         <button class="menu-toggle" id="menu-toggle">☰</button>
         <ul class="nav-links" id="nav-links">
@@ -40,6 +41,7 @@
                     <li><a href="{% url 'professores_geral' %}">Geral</a></li>
                 </ul>
             </li>
+            <li><a href="{% url 'relatorios' %}">Relatorios</a></li>
         </ul>
     </nav>
 
@@ -51,12 +53,15 @@
                         <th>Nome</th>
                         <th>Turmas</th>
                         <th>Aniversário</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="professores-tabela-body">
-                    <!-- Dados preenchidos dinamicamente -->
+                    
                 </tbody>
             </table>
+            <div id="paginacao-professores" class="paginacao"></div>
+
         </section>
 
         <section class="professores-formulario">
@@ -86,9 +91,6 @@
                     </div>
                     <h3>Turmas:</h3>
                     <div class="professores-turmas-lista" id="professores-turmas">
-                        <label><input type="checkbox" name="professores-turma" value="Turma 1"> Turma 1</label>
-                        <label><input type="checkbox" name="professores-turma" value="Turma 2"> Turma 2</label>
-                        <label><input type="checkbox" name="professores-turma" value="Turma 3"> Turma 3</label>
                     </div>
                     <button class="professores-submit" type="submit" id="professores-submit-button">Concluir</button>
                 </form>
@@ -97,7 +99,7 @@
     </main>
 
     <!--MODAIS-->
-     <!-- Modal de Cadastro de Turma -->
+      <!-- Modal de Cadastro de Turma -->
     <div id="modal-cadastro-turma" class="modal-cadastro">
         <div id="modal-cadastro-content-aluno" class="modal-cadastro-content">
             <div class="modal-cadastro-header">
