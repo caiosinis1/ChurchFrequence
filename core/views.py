@@ -211,16 +211,24 @@ from django.core.paginator import Paginator
 
 def listar_alunos(request):
     turma_id = request.GET.get("turma_id")
+    termo = request.GET.get("termo", "").strip().lower()  # Obtém o termo de busca
     pagina = request.GET.get("pagina", 1)  # Obtém o número da página, padrão = 1
     itens_por_pagina = 7  # Define o número máximo de alunos por página
 
+    # Filtra os alunos com base na turma (se fornecida)
     alunos = Aluno.objects.all()
     if turma_id:
         alunos = alunos.filter(turma_id=turma_id)
 
-    paginator = Paginator(alunos, itens_por_pagina)
-    pagina_atual = paginator.get_page(pagina)  # Obtém a página específica
+    # Aplica a busca por nome se um termo foi fornecido
+    if termo:
+        alunos = alunos.filter(nome__icontains=termo)
 
+    # Paginação dos resultados
+    paginator = Paginator(alunos, itens_por_pagina)
+    pagina_atual = paginator.get_page(pagina)
+
+    # Formatação dos dados para JSON
     alunos_data = []
     for aluno in pagina_atual:
         aniversario = aluno.data_nascimento.strftime("%d/%m") if aluno.data_nascimento else "N/A"
